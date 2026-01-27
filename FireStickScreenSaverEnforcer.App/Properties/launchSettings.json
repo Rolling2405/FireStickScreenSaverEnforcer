@@ -1,0 +1,10 @@
+{
+  "profiles": {
+    "FireStickScreenSaverEnforcer.App (Package)": {
+      "commandName": "MsixPackage"
+    },
+    "FireStickScreenSaverEnforcer.App (Unpackaged)": {
+      "commandName": "Project"
+    }
+  }
+}
