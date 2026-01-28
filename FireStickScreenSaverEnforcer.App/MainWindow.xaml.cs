@@ -26,16 +26,37 @@ public sealed partial class MainWindow : Window
         LoadSettings();
     }
 
+
     private void LoadSettings()
     {
         _settings = SettingsService.Load();
-        IpAddressTextBox.Text = _settings.FirestickIp;
+        
+        // Split the stored IP:Port format
+        var parts = _settings.FirestickIp.Split(':');
+        if (parts.Length == 2)
+        {
+            IpAddressTextBox.Text = parts[0];
+            PortTextBox.Text = parts[1];
+        }
+        else if (parts.Length == 1)
+        {
+            IpAddressTextBox.Text = parts[0];
+            PortTextBox.Text = "5555";
+        }
+        else
+        {
+            IpAddressTextBox.Text = "192.168.1.50";
+            PortTextBox.Text = "5555";
+        }
+        
         IntervalNumberBox.Value = _settings.IntervalSeconds;
     }
 
     private void SaveSettings()
     {
-        _settings.FirestickIp = IpAddressTextBox.Text?.Trim() ?? string.Empty;
+        var ip = IpAddressTextBox.Text?.Trim() ?? "192.168.1.50";
+        var port = PortTextBox.Text?.Trim() ?? "5555";
+        _settings.FirestickIp = $"{ip}:{port}";
         _settings.IntervalSeconds = (int)IntervalNumberBox.Value;
         SettingsService.Save(_settings);
     }
@@ -69,9 +90,13 @@ public sealed partial class MainWindow : Window
             StartButton.IsEnabled = !isRunning;
             StopButton.IsEnabled = isRunning;
             IpAddressTextBox.IsEnabled = !isRunning;
+            PortTextBox.IsEnabled = !isRunning;
             IntervalNumberBox.IsEnabled = !isRunning;
         });
     }
+
+
+
 
     private async void StartButton_Click(object sender, RoutedEventArgs e)
     {
@@ -83,6 +108,18 @@ public sealed partial class MainWindow : Window
             Log("Error: IP address is empty.");
             return;
         }
+
+        // Validate port
+        var port = PortTextBox.Text?.Trim();
+        if (string.IsNullOrEmpty(port) || !int.TryParse(port, out var portNumber) || portNumber < 1 || portNumber > 65535)
+        {
+            SetStatus("? Error: Please enter a valid port (1-65535).");
+            Log("Error: Invalid port number.");
+            return;
+        }
+
+        // Combine IP and port for ADB
+        var fullAddress = $"{ipAddress}:{port}";
 
         // Validate interval
         var interval = (int)IntervalNumberBox.Value;
@@ -110,11 +147,11 @@ public sealed partial class MainWindow : Window
         _isRunning = true;
         SetButtonStates(true);
         SetStatus("?? Running - Enforcing 1-minute timeout...");
-        Log($"Started enforcement. Target IP: {ipAddress}, Interval: {interval}s");
+        Log($"Started enforcement. Target: {fullAddress}, Interval: {interval}s");
 
         try
         {
-            await RunEnforcementLoopAsync(ipAddress, interval, _cancellationTokenSource.Token);
+            await RunEnforcementLoopAsync(fullAddress, interval, _cancellationTokenSource.Token);
         }
         catch (OperationCanceledException)
         {
@@ -253,4 +290,3 @@ public sealed partial class MainWindow : Window
         }
     }
 }
-

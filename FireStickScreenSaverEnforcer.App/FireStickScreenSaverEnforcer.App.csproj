@@ -6,7 +6,7 @@
     <RootNamespace>FireStickScreenSaverEnforcer.App</RootNamespace>
     <ApplicationManifest>app.manifest</ApplicationManifest>
     <Platforms>x64</Platforms>
-    <RuntimeIdentifiers>win-x64</RuntimeIdentifiers>
+    <RuntimeIdentifier>win-x64</RuntimeIdentifier>
     <UseWinUI>true</UseWinUI>
     <Nullable>enable</Nullable>
     <ImplicitUsings>enable</ImplicitUsings>
@@ -14,6 +14,9 @@
     <!-- Unpackaged deployment (no MSIX, no certificate required) -->
     <WindowsPackageType>None</WindowsPackageType>
     <WindowsAppSDKSelfContained>true</WindowsAppSDKSelfContained>
+    
+    <!-- Self-contained: Bundle .NET runtime (no .NET install required) -->
+    <SelfContained>true</SelfContained>
     
     <!-- Application info -->
     <AssemblyName>FireStickScreenSaverEnforcer</AssemblyName>
@@ -32,25 +35,25 @@
     <PackageReference Include="Microsoft.WindowsAppSDK" Version="1.8.260101001" />
   </ItemGroup>
 
-  <!-- Platform-tools ADB files - copied to output directory (only if present) -->
-  <ItemGroup Condition="Exists('platform-tools\adb.exe')">
-    <None Include="platform-tools\adb.exe">
+  <!-- Platform-tools ADB files - bundled with the app -->
+  <ItemGroup>
+    <Content Include="platform-tools\adb.exe">
       <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
       <Link>platform-tools\adb.exe</Link>
-    </None>
-    <None Include="platform-tools\AdbWinApi.dll" Condition="Exists('platform-tools\AdbWinApi.dll')">
+    </Content>
+    <Content Include="platform-tools\AdbWinApi.dll">
       <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
       <Link>platform-tools\AdbWinApi.dll</Link>
-    </None>
-    <None Include="platform-tools\AdbWinUsbApi.dll" Condition="Exists('platform-tools\AdbWinUsbApi.dll')">
+    </Content>
+    <Content Include="platform-tools\AdbWinUsbApi.dll">
       <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
       <Link>platform-tools\AdbWinUsbApi.dll</Link>
-    </None>
+    </Content>
   </ItemGroup>
 
-  <!-- Publish Properties -->
-  <PropertyGroup>
-    <PublishReadyToRun Condition="'$(Configuration)' == 'Debug'">False</PublishReadyToRun>
-    <PublishReadyToRun Condition="'$(Configuration)' != 'Debug'">True</PublishReadyToRun>
+  <!-- Publish Properties for Release builds -->
+  <PropertyGroup Condition="'$(Configuration)' == 'Release'">
+    <PublishReadyToRun>true</PublishReadyToRun>
+    <PublishTrimmed>false</PublishTrimmed>
   </PropertyGroup>
 </Project>

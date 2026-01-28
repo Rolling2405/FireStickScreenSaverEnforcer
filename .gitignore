@@ -121,11 +121,10 @@ BundleArtifacts/
 # Uncomment below if you don't want settings.json tracked:
 # settings.json
 
-## Platform-tools (ADB binaries)
-# These must be downloaded separately from Google
-# https://developer.android.com/studio/releases/platform-tools
-platform-tools/
-**/platform-tools/
+## Platform-tools (ADB binaries) - BUNDLED WITH APP
+# These are included in the repository for portability.
+# Downloaded from: https://developer.android.com/studio/releases/platform-tools
+# Google's license terms apply to these binaries.
 
 ## Windows Thumbnail cache
 Thumbs.db
