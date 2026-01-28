@@ -93,6 +93,10 @@ nCrunchTemp_*
 *.tar.gz
 *.rar
 
+## Windows App SDK Runtime Installer (too large for Git - 101 MB)
+**/windowsappruntimeinstall-x64.exe
+windowsappruntimeinstall-*.exe
+
 ## Click-Once
 publish/
 

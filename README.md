@@ -20,7 +20,8 @@ Fire OS has a frustrating behavior: it keeps reverting the screensaver timeout t
 - **Windows 11** (x64)
 - **Fire TV Stick** with ADB debugging enabled
 - **Same local network** (Fire TV and PC must be on the same LAN)
-- **.NET 10 Runtime** (or build as self-contained)
+
+> **Note:** The app will automatically install Windows App SDK Runtime if needed (one-click setup on first launch).
 
 ## How It Works
 
@@ -120,9 +121,27 @@ Settings are automatically saved to `settings.json` next to the executable.
 
 ## Troubleshooting
 
+### App shows "Windows App SDK Runtime Required" dialog
+
+**This is normal on first launch!** The app will automatically install the required runtime:
+
+1. Click **"Install"** when prompted
+2. Allow administrator permission when requested
+3. Wait ~1 minute for installation
+4. App will automatically restart
+5. **Done!** The app will launch normally from now on
+
+### App won't launch (no window or dialog appears)
+
+This shouldn't happen with the bundled installer, but if it does:
+
+1. **Manually install:** [Windows App SDK Runtime 1.8](https://aka.ms/windowsappsdk/1.8/latest/windowsappruntimeinstall-x64.exe)
+2. **Restart** your computer  
+3. **Try the app again**
+
 ### "Missing ADB files" Error
 
-Make sure you have copied `adb.exe`, `AdbWinApi.dll`, and `AdbWinUsbApi.dll` to the `platform-tools` folder next to the executable.
+The app includes ADB files - you shouldn't see this error. If you do, re-extract the ZIP file.
 
 ### "Connection failed" or "device offline"
 
@@ -135,6 +154,8 @@ Make sure you have copied `adb.exe`, `AdbWinApi.dll`, and `AdbWinUsbApi.dll` to 
 ### Windows Firewall Prompt
 
 When first connecting, Windows Firewall may ask to allow `adb.exe`. Click **Allow** for private networks.
+
+
 
 ### ADB Authorization Prompt Not Appearing
 

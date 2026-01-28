@@ -51,6 +51,13 @@
     </None>
   </ItemGroup>
 
+  <!-- Windows App SDK Runtime Installer - bundled for one-click setup -->
+  <ItemGroup>
+    <None Include="windowsappruntimeinstall-x64.exe" Condition="Exists('windowsappruntimeinstall-x64.exe')">
+      <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
+    </None>
+  </ItemGroup>
+
   <!-- Publish Properties -->
   <PropertyGroup>
     <PublishReadyToRun Condition="'$(Configuration)' == 'Debug'">False</PublishReadyToRun>
