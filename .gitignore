@@ -127,16 +127,17 @@ BundleArtifacts/
 # Uncomment below if you don't want settings.json tracked:
 # settings.json
 
-## Platform-tools (ADB binaries)
-# These must be downloaded separately from Google
-# https://developer.android.com/studio/releases/platform-tools
-platform-tools/
-**/platform-tools/
+## Platform-tools (ADB binaries) - INCLUDED IN REPO
+# These ARE tracked in Git so the app is fully portable
+# Downloaded from: https://developer.android.com/studio/releases/platform-tools
+# Note: We WANT these in the repo for portability!
 
 ## Windows Thumbnail cache
 Thumbs.db
 ehthumbs.db
 Desktop.ini
+
+
 
 ## macOS
 .DS_Store
