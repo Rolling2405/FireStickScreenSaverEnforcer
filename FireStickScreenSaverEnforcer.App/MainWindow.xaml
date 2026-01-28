@@ -73,15 +73,15 @@
                     Spacing="12" 
                     Margin="0,24,0,16">
             <Button x:Name="StartButton" 
-                    Content="▶ Start Enforcing" 
+                    Content="Start Enforcing" 
                     Style="{StaticResource AccentButtonStyle}"
                     Click="StartButton_Click"
-                    Width="150"/>
+                    Width="140"/>
             <Button x:Name="StopButton" 
-                    Content="⏹ Stop" 
+                    Content="Stop" 
                     Click="StopButton_Click"
                     IsEnabled="False"
-                    Width="100"/>
+                    Width="80"/>
         </StackPanel>
 
         <!-- Status -->
