@@ -33,13 +33,22 @@
                        Opacity="0.7"
                        Margin="0,0,0,16"/>
 
-            <!-- Fire TV IP Address -->
+
+            <!-- Fire TV IP Address and Port -->
             <StackPanel Spacing="4">
-                <TextBlock Text="Fire TV IP Address (with port)"/>
-                <TextBox x:Name="IpAddressTextBox" 
-                         PlaceholderText="192.168.1.50:5555"
-                         Width="280"
-                         HorizontalAlignment="Left"/>
+                <TextBlock Text="Fire TV Connection"/>
+                <StackPanel Orientation="Horizontal" Spacing="8">
+                    <TextBox x:Name="IpAddressTextBox" 
+                             Header="IP Address"
+                             PlaceholderText="192.168.1.50"
+                             Width="180"
+                             HorizontalAlignment="Left"/>
+                    <TextBox x:Name="PortTextBox" 
+                             Header="Port"
+                             PlaceholderText="5555"
+                             Width="80"
+                             HorizontalAlignment="Left"/>
+                </StackPanel>
             </StackPanel>
 
             <!-- Interval -->
