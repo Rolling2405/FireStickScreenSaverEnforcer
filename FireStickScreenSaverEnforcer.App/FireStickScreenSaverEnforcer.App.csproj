@@ -6,7 +6,7 @@
     <RootNamespace>FireStickScreenSaverEnforcer.App</RootNamespace>
     <ApplicationManifest>app.manifest</ApplicationManifest>
     <Platforms>x64</Platforms>
-    <RuntimeIdentifiers>win-x64</RuntimeIdentifiers>
+    <RuntimeIdentifier>win-x64</RuntimeIdentifier>
     <UseWinUI>true</UseWinUI>
     <Nullable>enable</Nullable>
     <ImplicitUsings>enable</ImplicitUsings>
@@ -14,6 +14,9 @@
     <!-- Unpackaged deployment (no MSIX, no certificate required) -->
     <WindowsPackageType>None</WindowsPackageType>
     <WindowsAppSDKSelfContained>true</WindowsAppSDKSelfContained>
+    
+    <!-- Self-contained: Bundle .NET runtime (no .NET install required) -->
+    <SelfContained>true</SelfContained>
     
     <!-- Application info -->
     <AssemblyName>FireStickScreenSaverEnforcer</AssemblyName>
