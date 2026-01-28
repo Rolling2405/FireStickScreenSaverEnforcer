@@ -87,6 +87,12 @@ nCrunchTemp_*
 *.appxbundle
 *.appxupload
 
+## Release packages (do NOT commit to Git - upload to GitHub Releases instead)
+*.zip
+*.7z
+*.tar.gz
+*.rar
+
 ## Click-Once
 publish/
 
