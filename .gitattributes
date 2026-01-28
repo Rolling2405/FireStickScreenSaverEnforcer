@@ -1,26 +1,7 @@
 ###############################################################################
-# Set default behavior to automatically normalize line endings to CRLF (Windows)
+# Set default behavior to automatically normalize line endings.
 ###############################################################################
-* text=auto eol=crlf
-
-###############################################################################
-# Explicitly set Windows line endings for common file types
-###############################################################################
-*.cs text eol=crlf
-*.xaml text eol=crlf
-*.csproj text eol=crlf
-*.sln text eol=crlf
-*.json text eol=crlf
-*.xml text eol=crlf
-*.config text eol=crlf
-*.manifest text eol=crlf
-*.md text eol=crlf
-*.txt text eol=crlf
-*.yml text eol=crlf
-*.yaml text eol=crlf
-*.props text eol=crlf
-*.targets text eol=crlf
-*.pubxml text eol=crlf
+* text=auto
 
 ###############################################################################
 # Set default behavior for command prompt diff.
@@ -59,19 +40,9 @@
 #
 # image files are treated as binary by default.
 ###############################################################################
-*.jpg binary
-*.png binary
-*.gif binary
-*.ico binary
-
-###############################################################################
-# Binary files (no line ending conversion)
-###############################################################################
-*.exe binary
-*.dll binary
-*.zip binary
-*.7z binary
-*.pdf binary
+#*.jpg   binary
+#*.png   binary
+#*.gif   binary
 
 ###############################################################################
 # diff behavior for common document formats

@@ -33,22 +33,13 @@
                        Opacity="0.7"
                        Margin="0,0,0,16"/>
 
-
-            <!-- Fire TV IP Address and Port -->
+            <!-- Fire TV IP Address -->
             <StackPanel Spacing="4">
-                <TextBlock Text="Fire TV Connection"/>
-                <StackPanel Orientation="Horizontal" Spacing="8">
-                    <TextBox x:Name="IpAddressTextBox" 
-                             Header="IP Address"
-                             PlaceholderText="192.168.1.50"
-                             Width="180"
-                             HorizontalAlignment="Left"/>
-                    <TextBox x:Name="PortTextBox" 
-                             Header="Port"
-                             PlaceholderText="5555"
-                             Width="80"
-                             HorizontalAlignment="Left"/>
-                </StackPanel>
+                <TextBlock Text="Fire TV IP Address (with port)"/>
+                <TextBox x:Name="IpAddressTextBox" 
+                         PlaceholderText="192.168.1.50:5555"
+                         Width="280"
+                         HorizontalAlignment="Left"/>
             </StackPanel>
 
             <!-- Interval -->
@@ -70,20 +61,19 @@
                     Spacing="12" 
                     Margin="0,24,0,16">
             <Button x:Name="StartButton" 
-                    Content="Start Enforcing" 
+                    Content="▶ Start Enforcing" 
                     Style="{StaticResource AccentButtonStyle}"
                     Click="StartButton_Click"
                     Width="150"/>
             <Button x:Name="StopButton" 
-                    Content="Stop" 
+                    Content="⏹ Stop" 
                     Click="StopButton_Click"
                     IsEnabled="False"
                     Width="100"/>
         </StackPanel>
 
         <!-- Status -->
-        <Border x:Name="StatusBorder"
-                Grid.Row="2" 
+        <Border Grid.Row="2" 
                 Background="{ThemeResource CardBackgroundFillColorDefaultBrush}"
                 CornerRadius="4"
                 Padding="12"

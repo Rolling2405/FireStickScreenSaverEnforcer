@@ -87,6 +87,12 @@ nCrunchTemp_*
 *.appxbundle
 *.appxupload
 
+## Release packages (do NOT commit to Git - upload to GitHub Releases instead)
+*.zip
+*.7z
+*.tar.gz
+*.rar
+
 ## Click-Once
 publish/
 
@@ -121,10 +127,11 @@ BundleArtifacts/
 # Uncomment below if you don't want settings.json tracked:
 # settings.json
 
-## Platform-tools (ADB binaries) - BUNDLED WITH APP
-# These are included in the repository for portability.
-# Downloaded from: https://developer.android.com/studio/releases/platform-tools
-# Google's license terms apply to these binaries.
+## Platform-tools (ADB binaries)
+# These must be downloaded separately from Google
+# https://developer.android.com/studio/releases/platform-tools
+platform-tools/
+**/platform-tools/
 
 ## Windows Thumbnail cache
 Thumbs.db

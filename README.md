@@ -2,26 +2,17 @@
 
 A portable Windows desktop application that keeps your Fire TV Stick screensaver timeout forced to 1 minute (60 seconds) by periodically checking and correcting the setting via ADB.
 
-## Download
-
-**?? Latest Release:** [Download v1.0.0](https://github.com/Rolling2405/FireStickScreenSaverEnforcer/releases/latest)
-
-Extract the ZIP file to any folder and run `FireStickScreenSaverEnforcer.exe` - no installation needed!
-
 ## Why This App?
 
 Fire OS has a frustrating behavior: it keeps reverting the screensaver timeout to 5 minutes (300000ms) after wake/resume events. This app runs in the background and automatically enforces your preferred 1-minute timeout by monitoring and correcting the setting at regular intervals.
 
 ## Features
 
-
 - ?? **Automatic Enforcement**: Periodically checks and corrects the screensaver timeout
 - ?? **Easy Setup**: Simple IP address configuration
 - ?? **Configurable Interval**: Check every 10-600 seconds (default: 30 seconds)
 - ?? **Activity Log**: See exactly what's happening with timestamped entries
-- ?? **Fully Portable**: Runs from any folder, no installation required
-- ?? **ADB Included**: All required ADB tools are bundled - nothing extra to download
-- ?? **Self-Contained**: .NET runtime is bundled - no .NET installation required
+- ?? **Portable**: Runs from any folder, no installation required
 - ?? **No Certificate Required**: Unpackaged deployment, no MSIX signing needed
 
 ## Requirements
@@ -29,14 +20,11 @@ Fire OS has a frustrating behavior: it keeps reverting the screensaver timeout t
 - **Windows 11** (x64)
 - **Fire TV Stick** with ADB debugging enabled
 - **Same local network** (Fire TV and PC must be on the same LAN)
-
-> **Note:** No additional software installation required! The app includes everything it needs.
+- **.NET 10 Runtime** (or build as self-contained)
 
 ## How It Works
 
 The app uses ADB (Android Debug Bridge) to communicate with your Fire TV Stick:
-
-
 
 1. **Connects** to the Fire TV via `adb connect <ip>:5555`
 2. **Reads** the current timeout: `adb shell settings get system screen_off_timeout`
@@ -61,7 +49,29 @@ The target timeout is 60000ms (1 minute / 60 seconds).
 2. Note the IP address (e.g., `192.168.1.50`)
 3. For best results, assign a static IP to your Fire TV in your router settings
 
-### 3. First-Time ADB Authorization
+### 3. Download Platform-Tools
+
+You need the Android platform-tools (containing `adb.exe`):
+
+1. Download from: https://developer.android.com/studio/releases/platform-tools
+2. Extract the ZIP file
+3. Copy these 3 files to a `platform-tools` folder next to the app executable:
+   - `adb.exe`
+   - `AdbWinApi.dll`
+   - `AdbWinUsbApi.dll`
+
+Your folder structure should look like:
+```
+FireStickScreenSaverEnforcer/
+??? FireStickScreenSaverEnforcer.exe
+??? platform-tools/
+?   ??? adb.exe
+?   ??? AdbWinApi.dll
+?   ??? AdbWinUsbApi.dll
+??? (other app files)
+```
+
+### 4. First-Time ADB Authorization
 
 The first time you connect via ADB, your Fire TV will show an authorization prompt:
 
@@ -71,8 +81,6 @@ The first time you connect via ADB, your Fire TV will show an authorization prom
 4. Click **OK**
 
 If you miss this prompt, the app will keep retrying until authorized.
-
-> **Note:** ADB tools (adb.exe and related DLLs) are bundled with this app - no separate download required!
 
 ## Building from Source
 
@@ -91,23 +99,22 @@ If you miss this prompt, the app will keep retrying until authorized.
 4. Build the solution (Ctrl+Shift+B)
 5. The output will be in `bin\x64\Debug\net10.0-windows10.0.19041.0\win-x64\`
 
-### Publish for Distribution
+### Publish as Self-Contained
 
-The app is already configured as self-contained. To create a release build:
+For a fully portable deployment that doesn't require .NET 10 to be installed:
 
 ```powershell
-dotnet publish -c Release
+dotnet publish -c Release -r win-x64 --self-contained true
 ```
-
-The output in `bin\x64\Release\net10.0-windows10.0.19041.0\win-x64\publish\` contains everything needed - just zip and distribute!
 
 ## Running the App
 
 1. Navigate to the output folder (or published folder)
-2. Run `FireStickScreenSaverEnforcer.exe`
-3. Enter your Fire TV's IP address (e.g., `192.168.1.50:5555`)
-4. Set your preferred check interval (default: 30 seconds)
-5. Click **Start Enforcing**
+2. Ensure `platform-tools` folder contains the ADB files
+3. Run `FireStickScreenSaverEnforcer.exe`
+4. Enter your Fire TV's IP address (e.g., `192.168.1.50:5555`)
+5. Set your preferred check interval (default: 30 seconds)
+6. Click **Start Enforcing**
 
 Settings are automatically saved to `settings.json` next to the executable.
 
