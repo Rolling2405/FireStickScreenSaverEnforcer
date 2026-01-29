@@ -8,12 +8,12 @@ Fire OS has a frustrating behavior: it keeps reverting the screensaver timeout t
 
 ## Features
 
-- ?? **Automatic Enforcement**: Periodically checks and corrects the screensaver timeout
-- ?? **Easy Setup**: Simple IP address configuration
-- ?? **Configurable Interval**: Check every 10-600 seconds (default: 30 seconds)
-- ?? **Activity Log**: See exactly what's happening with timestamped entries
-- ?? **Portable**: Runs from any folder, no installation required
-- ?? **No Certificate Required**: Unpackaged deployment, no MSIX signing needed
+- ? **Automatic Enforcement**: Periodically checks and corrects the screensaver timeout
+- ? **Easy Setup**: Simple IP address configuration
+- ? **Configurable Interval**: Check every 10-600 seconds (default: 30 seconds)
+- ? **Activity Log**: See exactly what's happening with timestamped entries
+- ? **Portable**: Runs from any folder, no installation required
+- ? **No Certificate Required**: Unpackaged deployment, no MSIX signing needed
 
 ## Requirements
 
@@ -21,7 +21,7 @@ Fire OS has a frustrating behavior: it keeps reverting the screensaver timeout t
 - **Fire TV Stick** with ADB debugging enabled
 - **Same local network** (Fire TV and PC must be on the same LAN)
 
-> **Note:** The app will automatically install Windows App SDK Runtime if needed (one-click setup on first launch).
+> **Note:** The app is fully self-contained. No .NET or Windows App SDK installation is required. Just extract and run!
 
 ## How It Works
 
@@ -121,27 +121,13 @@ Settings are automatically saved to `settings.json` next to the executable.
 
 ## Troubleshooting
 
-### App shows "Windows App SDK Runtime Required" dialog
+### App won't launch (no window appears)
 
-**This is normal on first launch!** The app will automatically install the required runtime:
-
-1. Click **"Install"** when prompted
-2. Allow administrator permission when requested
-3. Wait ~1 minute for installation
-4. App will automatically restart
-5. **Done!** The app will launch normally from now on
-
-### App won't launch (no window or dialog appears)
-
-This shouldn't happen with the bundled installer, but if it does:
-
-1. **Manually install:** [Windows App SDK Runtime 1.8](https://aka.ms/windowsappsdk/1.8/latest/windowsappruntimeinstall-x64.exe)
-2. **Restart** your computer  
-3. **Try the app again**
-
-### "Missing ADB files" Error
-
-The app includes ADB files - you shouldn't see this error. If you do, re-extract the ZIP file.
+- Make sure you extracted the ZIP completely (don't run from inside the ZIP)
+- Ensure all `.pri` files are present in the folder (should be automatic)
+- If you see a Windows SmartScreen warning, click **More info** ? **Run anyway**
+- If you get a missing DLL error, re-extract the ZIP and try again
+- If you see a "Missing ADB files" error, ensure the `platform-tools` folder is present with all required files
 
 ### "Connection failed" or "device offline"
 
@@ -154,8 +140,6 @@ The app includes ADB files - you shouldn't see this error. If you do, re-extract
 ### Windows Firewall Prompt
 
 When first connecting, Windows Firewall may ask to allow `adb.exe`. Click **Allow** for private networks.
-
-
 
 ### ADB Authorization Prompt Not Appearing
 
@@ -189,8 +173,8 @@ This app only modifies the `screen_off_timeout` setting and does not access any 
 ```
 FireStickScreenSaverEnforcer/
 ??? FireStickScreenSaverEnforcer.exe    # Main application
-??? settings.json                        # Your saved settings (auto-created)
-??? platform-tools/                      # ADB binaries (you must add these)
+??? settings.json                       # Your saved settings (auto-created)
+??? platform-tools/                     # ADB binaries (you must add these)
 ?   ??? adb.exe
 ?   ??? AdbWinApi.dll
 ?   ??? AdbWinUsbApi.dll

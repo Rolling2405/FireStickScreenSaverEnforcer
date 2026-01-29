@@ -113,10 +113,10 @@ Write-Host "Release package: $outputZip" -ForegroundColor White
 Write-Host "Size: $zipSize MB" -ForegroundColor White
 Write-Host ""
 Write-Host "Package contents:" -ForegroundColor Yellow
-Write-Host "  • .NET 10 Runtime (self-contained)" -ForegroundColor White
-Write-Host "  • Windows App SDK Runtime installer (auto-install on first launch)" -ForegroundColor White
-Write-Host "  • ADB tools (platform-tools)" -ForegroundColor White
-Write-Host "  • Your application" -ForegroundColor White
+Write-Host "  â€¢ .NET 10 Runtime (self-contained)" -ForegroundColor White
+Write-Host "  â€¢ Windows App SDK Runtime installer (auto-install on first launch)" -ForegroundColor White
+Write-Host "  â€¢ ADB tools (platform-tools)" -ForegroundColor White
+Write-Host "  â€¢ Your application" -ForegroundColor White
 Write-Host ""
 Write-Host "User experience:" -ForegroundColor Yellow
 Write-Host "  1. Extract ZIP" -ForegroundColor White

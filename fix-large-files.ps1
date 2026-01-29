@@ -39,9 +39,9 @@ Write-Host "? Fixed!" -ForegroundColor Green
 Write-Host "========================================" -ForegroundColor Cyan
 Write-Host ""
 Write-Host "What happened:" -ForegroundColor Yellow
-Write-Host "  • ZIP files are now in .gitignore" -ForegroundColor White
-Write-Host "  • Removed from Git tracking" -ForegroundColor White
-Write-Host "  • File still exists locally (safe)" -ForegroundColor White
+Write-Host "  â€¢ ZIP files are now in .gitignore" -ForegroundColor White
+Write-Host "  â€¢ Removed from Git tracking" -ForegroundColor White
+Write-Host "  â€¢ File still exists locally (safe)" -ForegroundColor White
 Write-Host ""
 Write-Host "Next steps:" -ForegroundColor Yellow
 Write-Host "  1. In GitHub Desktop or Visual Studio:" -ForegroundColor White

@@ -68,8 +68,8 @@ Write-Host "  3. Commit message: 'Ignore runtime installer (too large for GitHub
 Write-Host "  4. Commit and push" -ForegroundColor White
 Write-Host ""
 Write-Host "Important:" -ForegroundColor Yellow
-Write-Host "  • The runtime installer stays on your computer" -ForegroundColor White
-Write-Host "  • It will be included in builds (via .csproj)" -ForegroundColor White
-Write-Host "  • It will be in the ZIP you upload to GitHub Releases" -ForegroundColor White
-Write-Host "  • It just won't be in the Git repository" -ForegroundColor White
+Write-Host "  â€¢ The runtime installer stays on your computer" -ForegroundColor White
+Write-Host "  â€¢ It will be included in builds (via .csproj)" -ForegroundColor White
+Write-Host "  â€¢ It will be in the ZIP you upload to GitHub Releases" -ForegroundColor White
+Write-Host "  â€¢ It just won't be in the Git repository" -ForegroundColor White
 Write-Host ""

@@ -10,10 +10,10 @@ Your Fire TV Screensaver Timeout Enforcer v1.0.0 is **complete and verified**!
 
 | Item | Status |
 |------|--------|
-| **Self-Contained App** | ? .NET 10 runtime bundled (165 DLLs) |
+| **Self-Contained App** | ? .NET 10 runtime bundled (no install required) |
 | **ADB Tools** | ? Included (adb.exe, AdbWinApi.dll, AdbWinUsbApi.dll) |
 | **Clean UI** | ? Separate IP/Port fields, no broken icons |
-| **Release ZIP** | ? Created (98.67 MB) |
+| **Release ZIP** | ? Created (99 MB) |
 | **Zero Dependencies** | ? Runs on any Windows 11 x64 |
 
 ---
@@ -25,9 +25,9 @@ Your Fire TV Screensaver Timeout Enforcer v1.0.0 is **complete and verified**!
 **Contents:**
 - ? FireStickScreenSaverEnforcer.exe
 - ? Complete .NET 10 runtime (self-contained)
-- ? Windows App SDK binaries
+- ? Windows App SDK binaries (self-contained)
 - ? ADB tools in platform-tools folder
-- ? All required DLLs
+- ? All required DLLs and .pri files
 
 **Users Need:** Nothing! Just Windows 11 x64.
 
@@ -40,7 +40,7 @@ Your Fire TV Screensaver Timeout Enforcer v1.0.0 is **complete and verified**!
 **In GitHub Desktop or Visual Studio:**
 
 Files to commit:
-- ? `FireStickScreenSaverEnforcer.App.csproj` (added SelfContained=true)
+- ? `FireStickScreenSaverEnforcer.App.csproj` (added .pri copy fix, removed installer)
 - ? `.gitignore` (allows platform-tools)
 - ? `platform-tools/adb.exe`
 - ? `platform-tools/AdbWinApi.dll`
@@ -50,12 +50,13 @@ Files to commit:
 
 **Commit Message:**
 ```
-Release v1.0.0 - Self-contained with ADB tools
+Release v1.0.0 - Truly self-contained, no runtime installer needed
 
-- Fully self-contained deployment (no .NET install required)
+- Fully self-contained deployment (no .NET or Windows App SDK install required)
 - Bundled ADB tools for portability
 - Clean button text (no emoji icons)
 - Separate IP and Port input fields
+- .pri file copy fix for WinUI 3
 - Updated .gitignore to include platform-tools
 ```
 
@@ -69,11 +70,11 @@ Release v1.0.0 - Self-contained with ADB tools
 
 2. **Edit your v1.0.0 release**
 
-3. **Delete the old ZIP** (the one without ADB tools)
+3. **Delete the old ZIP** (the one with the runtime installer, if present)
 
 4. **Upload the new ZIP:**
    - Location: `C:\dev\FireStickScreenSaverEnforcer\FireStickScreenSaverEnforcer-v1.0.0-win-x64.zip`
-   - Size: 98.67 MB
+   - Size: 99 MB
    - Includes: Everything users need!
 
 5. **Click "Update release"**
@@ -93,7 +94,7 @@ Automatically enforces a 1-minute screensaver timeout on your Fire TV Stick. Fir
 
 ## Features
 
-- ? **Fully Self-Contained** - No .NET installation required
+- ? **Fully Self-Contained** - No .NET or Windows App SDK installation required
 - ? **Zero Dependencies** - Everything bundled (runtime + ADB tools)
 - ? **Fully Portable** - No installation, runs from any folder
 - ? **Clean UI** - Separate IP and Port fields
@@ -102,7 +103,7 @@ Automatically enforces a 1-minute screensaver timeout on your Fire TV Stick. Fir
 
 ## Download
 
-**[?? Download FireStickScreenSaverEnforcer-v1.0.0-win-x64.zip](https://github.com/Rolling2405/FireStickScreenSaverEnforcer/releases/download/v1.0.0/FireStickScreenSaverEnforcer-v1.0.0-win-x64.zip)** (98.67 MB)
+**[?? Download FireStickScreenSaverEnforcer-v1.0.0-win-x64.zip](https://github.com/Rolling2405/FireStickScreenSaverEnforcer/releases/download/v1.0.0/FireStickScreenSaverEnforcer-v1.0.0-win-x64.zip)** (99 MB)
 
 Extract and run `FireStickScreenSaverEnforcer.exe` - that's it!
 
@@ -134,7 +135,7 @@ See the [README](https://github.com/Rolling2405/FireStickScreenSaverEnforcer#rea
 
 - **Platform:** Windows 11 x64 only
 - **.NET:** 10.0 (self-contained - runtime bundled)
-- **UI:** WinUI 3 with Windows App SDK 1.8
+- **UI:** WinUI 3 with Windows App SDK 1.8 (self-contained)
 - **Deployment:** Unpackaged (no certificate required)
 - **ADB:** Bundled platform-tools from Google
 - **Size:** ~99 MB (includes .NET runtime + ADB tools)
@@ -158,7 +159,7 @@ Before publishing, verify:
 - [ ] Committed all code changes to GitHub
 - [ ] Pushed to GitHub successfully
 - [ ] Downloaded and tested the ZIP locally
-- [ ] App runs without .NET installed on another PC (if possible)
+- [ ] App runs without .NET or Windows App SDK installed on another PC (if possible)
 - [ ] ADB files are in the extracted folder
 - [ ] Updated GitHub Release with new ZIP
 - [ ] Release notes are complete
