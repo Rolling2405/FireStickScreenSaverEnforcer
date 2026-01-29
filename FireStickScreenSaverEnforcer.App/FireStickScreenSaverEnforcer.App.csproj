@@ -51,12 +51,15 @@
     </None>
   </ItemGroup>
 
-  <!-- Windows App SDK Runtime Installer - bundled for one-click setup -->
-  <ItemGroup>
-    <None Include="windowsappruntimeinstall-x64.exe" Condition="Exists('windowsappruntimeinstall-x64.exe')">
-      <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
-    </None>
-  </ItemGroup>
+  <!-- Ensure .pri files are included in publish output (required for WinUI 3) -->
+  <Target Name="CopyPriFilesToPublish" AfterTargets="Publish">
+    <ItemGroup>
+      <PriFiles Include="$(OutputPath)*.pri" />
+    </ItemGroup>
+    <Copy SourceFiles="@(PriFiles)" DestinationFolder="$(PublishDir)" SkipUnchangedFiles="true" />
+  </Target>
+
+
 
   <!-- Publish Properties -->
   <PropertyGroup>

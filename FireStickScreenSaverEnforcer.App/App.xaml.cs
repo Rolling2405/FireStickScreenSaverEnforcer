@@ -1,5 +1,4 @@
 ﻿using Microsoft.UI.Xaml;
-using FireStickScreenSaverEnforcer.App.Services;
 
 namespace FireStickScreenSaverEnforcer.App;
 
@@ -21,24 +20,9 @@ public partial class App : Application
     /// <summary>
     /// Invoked when the application is launched.
     /// </summary>
-    protected override async void OnLaunched(LaunchActivatedEventArgs args)
+    protected override void OnLaunched(LaunchActivatedEventArgs args)
     {
         _window = new MainWindow();
-        
-        // Check if Windows App SDK Runtime is installed
-        if (!RuntimeBootstrapper.IsRuntimeInstalled())
-        {
-            // Prompt user to install runtime
-            var installed = await RuntimeBootstrapper.PromptAndInstallAsync(_window);
-            
-            if (!installed)
-            {
-                // User cancelled or installation failed - exit
-                Exit();
-                return;
-            }
-        }
-        
         _window.Activate();
     }
 }
