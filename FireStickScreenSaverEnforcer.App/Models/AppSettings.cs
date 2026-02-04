@@ -14,4 +14,9 @@ public sealed class AppSettings
     /// Interval in seconds between enforcement checks (10-600, default 30).
     /// </summary>
     public int IntervalSeconds { get; set; } = 30;
+
+    /// <summary>
+    /// Screensaver timeout in milliseconds (default: 60000).
+    /// </summary>
+    public int TimeoutMs { get; set; } = 60000;
 }

@@ -10,7 +10,6 @@ namespace FireStickScreenSaverEnforcer.App;
 /// </summary>
 public sealed partial class MainWindow : Window
 {
-    private const int TargetTimeoutMs = 60000; // 1 minute
     private CancellationTokenSource? _cancellationTokenSource;
     private AppSettings _settings = new();
     private bool _isRunning;
@@ -24,6 +23,8 @@ public sealed partial class MainWindow : Window
         appWindow.Resize(new Windows.Graphics.SizeInt32(600, 700));
         
         LoadSettings();
+        
+        TimeoutComboBox.SelectionChanged += TimeoutComboBox_SelectionChanged;
     }
 
     private void LoadSettings()
@@ -49,6 +50,12 @@ public sealed partial class MainWindow : Window
         }
         
         IntervalNumberBox.Value = _settings.IntervalSeconds;
+        
+        // Set timeout selection
+        if (_settings.TimeoutMs == 30000)
+            TimeoutComboBox.SelectedIndex = 0;
+        else
+            TimeoutComboBox.SelectedIndex = 1;
     }
 
     private void SaveSettings()
@@ -57,6 +64,13 @@ public sealed partial class MainWindow : Window
         var port = PortTextBox.Text?.Trim() ?? "5555";
         _settings.FirestickIp = $"{ip}:{port}";
         _settings.IntervalSeconds = (int)IntervalNumberBox.Value;
+        
+        // Save timeout selection
+        var selectedItem = TimeoutComboBox.SelectedItem as ComboBoxItem;
+        if (selectedItem != null && int.TryParse(selectedItem.Tag?.ToString(), out var ms))
+            _settings.TimeoutMs = ms;
+        else
+            _settings.TimeoutMs = 60000;
         SettingsService.Save(_settings);
     }
 
@@ -67,7 +81,14 @@ public sealed partial class MainWindow : Window
         
         DispatcherQueue.TryEnqueue(() =>
         {
-            LogTextBox.Text += (string.IsNullOrEmpty(LogTextBox.Text) ? "" : "\n") + logLine;
+            if (string.IsNullOrEmpty(LogTextBox.Text))
+            {
+                LogTextBox.Text = logLine;
+            }
+            else
+            {
+                LogTextBox.Text = LogTextBox.Text + Environment.NewLine + logLine;
+            }
             
             // Auto-scroll to bottom
             LogScrollViewer.ChangeView(null, LogScrollViewer.ScrollableHeight, null);
@@ -100,7 +121,7 @@ public sealed partial class MainWindow : Window
         var ipAddress = IpAddressTextBox.Text?.Trim();
         if (string.IsNullOrEmpty(ipAddress))
         {
-            SetStatus("? Error: Please enter a Fire TV IP address.");
+            SetStatus("Error: Please enter a Fire TV IP address.");
             Log("Error: IP address is empty.");
             return;
         }
@@ -109,7 +130,7 @@ public sealed partial class MainWindow : Window
         var port = PortTextBox.Text?.Trim();
         if (string.IsNullOrEmpty(port) || !int.TryParse(port, out var portNumber) || portNumber < 1 || portNumber > 65535)
         {
-            SetStatus("? Error: Please enter a valid port (1-65535).");
+            SetStatus("Error: Please enter a valid port (1-65535).");
             Log("Error: Invalid port number.");
             return;
         }
@@ -121,7 +142,7 @@ public sealed partial class MainWindow : Window
         var interval = (int)IntervalNumberBox.Value;
         if (interval < 10 || interval > 600)
         {
-            SetStatus("? Error: Interval must be between 10 and 600 seconds.");
+            SetStatus("Error: Interval must be between 10 and 600 seconds.");
             Log("Error: Invalid interval value.");
             return;
         }
@@ -130,7 +151,7 @@ public sealed partial class MainWindow : Window
         var (isValid, errorMessage) = AdbRunner.ValidateAdbFiles();
         if (!isValid)
         {
-            SetStatus("? Error: Missing ADB files. See log for details.");
+            SetStatus("Error: Missing ADB files. See log for details.");
             Log($"Error: {errorMessage}");
             return;
         }
@@ -142,7 +163,7 @@ public sealed partial class MainWindow : Window
         _cancellationTokenSource = new CancellationTokenSource();
         _isRunning = true;
         SetButtonStates(true);
-        SetStatus("?? Running - Enforcing 1-minute timeout...");
+        SetStatus("Running - Enforcing 1-minute timeout...");
         Log($"Started enforcement. Target: {fullAddress}, Interval: {interval}s");
 
         try
@@ -156,7 +177,7 @@ public sealed partial class MainWindow : Window
         catch (Exception ex)
         {
             Log($"Unexpected error: {ex.Message}");
-            SetStatus($"? Error: {ex.Message}");
+            SetStatus($"Error: {ex.Message}");
         }
         finally
         {
@@ -164,7 +185,7 @@ public sealed partial class MainWindow : Window
             SetButtonStates(false);
             if (!_cancellationTokenSource.IsCancellationRequested)
             {
-                SetStatus("? Stopped.");
+                SetStatus("Stopped.");
             }
         }
     }
@@ -174,7 +195,7 @@ public sealed partial class MainWindow : Window
         if (_cancellationTokenSource != null && !_cancellationTokenSource.IsCancellationRequested)
         {
             Log("Stopping enforcement...");
-            SetStatus("? Stopping...");
+            SetStatus("Stopping...");
             _cancellationTokenSource.Cancel();
         }
     }
@@ -215,8 +236,8 @@ public sealed partial class MainWindow : Window
             var errorMsg = !string.IsNullOrEmpty(connectResult.Error) 
                 ? connectResult.Error 
                 : connectResult.Output;
-            Log($"? Connect failed: {errorMsg} - Will retry next interval.");
-            SetStatus($"? Connection failed - will retry in next interval");
+            Log($"Connect failed: {errorMsg} - Will retry next interval.");
+            SetStatus($"Connection failed - will retry in next interval");
             return;
         }
 
@@ -224,7 +245,7 @@ public sealed partial class MainWindow : Window
         var connectOutput = connectResult.Output.ToLowerInvariant();
         if (connectOutput.Contains("connected") || connectOutput.Contains("already"))
         {
-            Log($"? Connected: {connectResult.Output}");
+            Log($"Connected: {connectResult.Output}");
         }
         else
         {
@@ -241,8 +262,8 @@ public sealed partial class MainWindow : Window
             var errorMsg = !string.IsNullOrEmpty(getResult.Error) 
                 ? getResult.Error 
                 : "Failed to get timeout value";
-            Log($"? Get timeout failed: {errorMsg}");
-            SetStatus($"? Could not read timeout - will retry");
+            Log($"Get timeout failed: {errorMsg}");
+            SetStatus($"Could not read timeout - will retry");
             return;
         }
 
@@ -251,38 +272,47 @@ public sealed partial class MainWindow : Window
         
         if (!int.TryParse(currentValueStr, out var currentValue))
         {
-            Log($"? Could not parse timeout value: '{currentValueStr}'");
+            Log($"Could not parse timeout value: '{currentValueStr}'");
             return;
         }
 
         Log($"Current timeout: {currentValue}ms ({currentValue / 1000}s)");
 
         // Step 3: Set timeout if needed
-        if (currentValue != TargetTimeoutMs)
+        if (currentValue != _settings.TimeoutMs)
         {
             if (cancellationToken.IsCancellationRequested) return;
             
-            Log($"? Timeout is {currentValue}ms, setting to {TargetTimeoutMs}ms (1 minute)...");
+            Log($"Timeout is {currentValue}ms, setting to {_settings.TimeoutMs}ms ({(_settings.TimeoutMs == 30000 ? "30 seconds" : "1 minute")})...");
             
-            var setResult = await AdbRunner.SetScreenOffTimeoutAsync(TargetTimeoutMs);
+            var setResult = await AdbRunner.SetScreenOffTimeoutAsync(_settings.TimeoutMs);
             
             if (setResult.Success)
             {
-                Log($"? Timeout set to {TargetTimeoutMs}ms (1 minute)");
-                SetStatus($"? Enforced 1-minute timeout at {DateTime.Now:HH:mm:ss}");
+                Log($"Timeout set to {_settings.TimeoutMs}ms (1 minute)");
+                SetStatus($"Enforced 1-minute timeout at {DateTime.Now:HH:mm:ss}");
             }
             else
             {
                 var errorMsg = !string.IsNullOrEmpty(setResult.Error) 
                     ? setResult.Error 
                     : "Failed to set timeout";
-                Log($"? Set timeout failed: {errorMsg}");
+                Log($"Set timeout failed: {errorMsg}");
             }
         }
         else
         {
-            Log($"? Timeout already at {TargetTimeoutMs}ms - no change needed");
-            SetStatus($"? Timeout correct as of {DateTime.Now:HH:mm:ss}");
+            Log($"Timeout already at {_settings.TimeoutMs}ms - no change needed");
+            SetStatus($"Timeout correct as of {DateTime.Now:HH:mm:ss}");
+        }
+    }
+
+    private void TimeoutComboBox_SelectionChanged(object sender, SelectionChangedEventArgs e)
+    {
+        var selectedItem = TimeoutComboBox.SelectedItem as ComboBoxItem;
+        if (selectedItem != null && int.TryParse(selectedItem.Tag?.ToString(), out var ms))
+        {
+            TargetTimeoutTextBlock.Text = $"Target timeout: {ms}ms ({(ms == 30000 ? "30 seconds" : "1 minute")})";
         }
     }
 }

@@ -36,6 +36,14 @@
                        Opacity="0.7"
                        Margin="0,0,0,16"/>
 
+            <!-- Timeout Selection -->
+            <StackPanel Spacing="4">
+                <TextBlock Text="Screensaver Timeout"/>
+                <ComboBox x:Name="TimeoutComboBox" Width="180" SelectedIndex="1">
+                    <ComboBoxItem Content="30 seconds" Tag="30000"/>
+                    <ComboBoxItem Content="1 minute" Tag="60000"/>
+                </ComboBox>
+            </StackPanel>
 
             <!-- Fire TV IP Address and Port -->
             <StackPanel Spacing="4">
@@ -134,7 +142,7 @@
             <Button x:Name="ClearLogButton" 
                     Content="Clear Log" 
                     Click="ClearLogButton_Click"/>
-            <TextBlock Text="Target timeout: 60000ms (1 minute)" 
+            <TextBlock x:Name="TargetTimeoutTextBlock" Text="Target timeout: 60000ms (1 minute)" 
                        VerticalAlignment="Center"
                        Opacity="0.6"
                        Margin="16,0,0,0"/>
