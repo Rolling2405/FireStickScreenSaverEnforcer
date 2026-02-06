@@ -163,8 +163,9 @@ public sealed partial class MainWindow : Window
         _cancellationTokenSource = new CancellationTokenSource();
         _isRunning = true;
         SetButtonStates(true);
-        SetStatus("Running - Enforcing 1-minute timeout...");
-        Log($"Started enforcement. Target: {fullAddress}, Interval: {interval}s");
+        var timeoutText = _settings.TimeoutMs == 30000 ? "30 seconds" : "1 minute";
+        SetStatus($"Running - Enforcing {timeoutText} timeout...");
+        Log($"Started enforcement. Target: {fullAddress}, Interval: {interval}s, Timeout: {timeoutText}");
 
         try
         {
@@ -289,8 +290,9 @@ public sealed partial class MainWindow : Window
             
             if (setResult.Success)
             {
-                Log($"Timeout set to {_settings.TimeoutMs}ms (1 minute)");
-                SetStatus($"Enforced 1-minute timeout at {DateTime.Now:HH:mm:ss}");
+                var timeoutText = _settings.TimeoutMs == 30000 ? "30 seconds" : "1 minute";
+                Log($"Timeout set to {_settings.TimeoutMs}ms ({timeoutText})");
+                SetStatus($"Enforced {timeoutText} timeout at {DateTime.Now:HH:mm:ss}");
             }
             else
             {

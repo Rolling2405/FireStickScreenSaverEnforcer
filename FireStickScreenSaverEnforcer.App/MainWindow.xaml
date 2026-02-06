@@ -31,7 +31,7 @@
                        Style="{StaticResource TitleTextBlockStyle}" 
                        Margin="0,0,0,8"/>
             
-            <TextBlock Text="Keeps your Fire TV screensaver timeout at 1 minute (60 seconds) by periodically checking and correcting the setting via ADB."
+            <TextBlock Text="Keeps your Fire TV screensaver timeout at your chosen value (1 minute or 30 seconds) by periodically checking and correcting the setting via ADB."
                        TextWrapping="Wrap"
                        Opacity="0.7"
                        Margin="0,0,0,16"/>
