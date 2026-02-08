@@ -36,6 +36,8 @@ public sealed partial class MainWindow : Window
 
         // Intercept the close button to minimize to tray instead of exiting
         this.AppWindow.Closing += AppWindow_Closing;
+        // Intercept minimize event to hide to tray
+        this.AppWindow.Changed += AppWindow_Changed;
     }
 
     private void LoadSettings()
