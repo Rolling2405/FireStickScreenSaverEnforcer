@@ -1,5 +1,6 @@
 using Microsoft.UI.Xaml;
 using Microsoft.UI.Xaml.Controls;
+using Microsoft.UI.Windowing;
 using FireStickScreenSaverEnforcer.App.Models;
 using FireStickScreenSaverEnforcer.App.Services;
 
@@ -13,6 +14,8 @@ public sealed partial class MainWindow : Window
     private CancellationTokenSource? _cancellationTokenSource;
     private AppSettings _settings = new();
     private bool _isRunning;
+    private readonly TrayIconManager _trayIconManager = new();
+    private bool _forceClose;
 
     public MainWindow()
     {
@@ -25,6 +28,14 @@ public sealed partial class MainWindow : Window
         LoadSettings();
         
         TimeoutComboBox.SelectionChanged += TimeoutComboBox_SelectionChanged;
+
+        // Initialize system tray icon
+        _trayIconManager.RestoreRequested += OnTrayRestoreRequested;
+        _trayIconManager.ExitRequested += OnTrayExitRequested;
+        _trayIconManager.Create("Fire TV Screensaver Timeout Enforcer");
+
+        // Intercept the close button to minimize to tray instead of exiting
+        this.AppWindow.Closing += AppWindow_Closing;
     }
 
     private void LoadSettings()
@@ -56,6 +67,8 @@ public sealed partial class MainWindow : Window
             TimeoutComboBox.SelectedIndex = 0;
         else
             TimeoutComboBox.SelectedIndex = 1;
+
+        MinimizeToTrayCheckBox.IsChecked = _settings.MinimizeToTray;
     }
 
     private void SaveSettings()
@@ -71,6 +84,8 @@ public sealed partial class MainWindow : Window
             _settings.TimeoutMs = ms;
         else
             _settings.TimeoutMs = 60000;
+
+        _settings.MinimizeToTray = MinimizeToTrayCheckBox.IsChecked == true;
         SettingsService.Save(_settings);
     }
 
@@ -316,6 +331,44 @@ public sealed partial class MainWindow : Window
         {
             TargetTimeoutTextBlock.Text = $"Target timeout: {ms}ms ({(ms == 30000 ? "30 seconds" : "1 minute")})";
         }
+    }
+
+    private void AppWindow_Closing(AppWindow sender, AppWindowClosingEventArgs args)
+    {
+        if (!_forceClose && MinimizeToTrayCheckBox.IsChecked == true)
+        {
+            // Cancel close and hide window to tray instead
+            args.Cancel = true;
+            this.AppWindow.Hide();
+            _trayIconManager.UpdateTooltip(_isRunning
+                ? "Fire TV Enforcer - Running"
+                : "Fire TV Enforcer - Idle");
+        }
+        else
+        {
+            // Actually closing: clean up tray icon and cancel enforcement
+            _trayIconManager.Dispose();
+            _cancellationTokenSource?.Cancel();
+        }
+    }
+
+    private void OnTrayRestoreRequested()
+    {
+        DispatcherQueue.TryEnqueue(() =>
+        {
+            this.AppWindow.Show();
+            this.Activate();
+        });
+    }
+
+    private void OnTrayExitRequested()
+    {
+        DispatcherQueue.TryEnqueue(() =>
+        {
+            SaveSettings();
+            _forceClose = true;
+            Close();
+        });
     }
 }
 

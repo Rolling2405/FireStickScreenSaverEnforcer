@@ -73,6 +73,11 @@
                            Width="180"
                            HorizontalAlignment="Left"/>
             </StackPanel>
+
+            <!-- Minimize to Tray -->
+            <CheckBox x:Name="MinimizeToTrayCheckBox"
+                      Content="Minimize to system tray on close"
+                      IsChecked="True"/>
         </StackPanel>
 
         <!-- Buttons -->

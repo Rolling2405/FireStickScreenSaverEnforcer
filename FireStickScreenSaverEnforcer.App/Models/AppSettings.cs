@@ -19,4 +19,9 @@ public sealed class AppSettings
     /// Screensaver timeout in milliseconds (default: 60000).
     /// </summary>
     public int TimeoutMs { get; set; } = 60000;
+
+    /// <summary>
+    /// When true, closing the window minimizes to the system tray instead of exiting.
+    /// </summary>
+    public bool MinimizeToTray { get; set; } = true;
 }
