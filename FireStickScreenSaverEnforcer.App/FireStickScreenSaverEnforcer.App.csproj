@@ -20,13 +20,16 @@
     
     <!-- Application info -->
     <AssemblyName>FireStickScreenSaverEnforcer</AssemblyName>
-    <Version>1.1.0</Version>
+    <Version>1.2.0</Version>
     <Authors>Your Name</Authors>
     <Description>Enforces 1-minute screensaver timeout on Fire TV Stick via ADB</Description>
   </PropertyGroup>
 
   <ItemGroup>
     <Manifest Include="$(ApplicationManifest)" />
+    <!-- <None Include="app.ico">
+      <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
+    </None> -->
   </ItemGroup>
 
   <!-- NuGet packages -->
