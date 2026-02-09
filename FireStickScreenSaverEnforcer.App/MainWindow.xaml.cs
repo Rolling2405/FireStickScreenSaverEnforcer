@@ -1,8 +1,10 @@
+using System.Runtime.InteropServices;
 using Microsoft.UI.Xaml;
 using Microsoft.UI.Xaml.Controls;
 using Microsoft.UI.Windowing;
 using FireStickScreenSaverEnforcer.App.Models;
 using FireStickScreenSaverEnforcer.App.Services;
+using WinRT.Interop;
 
 namespace FireStickScreenSaverEnforcer.App;
 
@@ -11,11 +13,29 @@ namespace FireStickScreenSaverEnforcer.App;
 /// </summary>
 public sealed partial class MainWindow : Window
 {
+    private const int GWL_WNDPROC = -4;
+    private const int WM_SIZE = 0x0005;
+    private const int SIZE_MINIMIZED = 1;
+    private const int SW_RESTORE = 9;
+
+    private delegate IntPtr WndProcDelegate(IntPtr hWnd, uint msg, IntPtr wParam, IntPtr lParam);
+
+    [DllImport("user32.dll", SetLastError = true)]
+    private static extern IntPtr SetWindowLongPtr(IntPtr hWnd, int nIndex, IntPtr dwNewLong);
+
+    [DllImport("user32.dll", SetLastError = true)]
+    private static extern IntPtr CallWindowProc(IntPtr lpPrevWndFunc, IntPtr hWnd, uint msg, IntPtr wParam, IntPtr lParam);
+
+    [DllImport("user32.dll")]
+    private static extern bool ShowWindow(IntPtr hWnd, int nCmdShow);
+
     private CancellationTokenSource? _cancellationTokenSource;
     private AppSettings _settings = new();
     private bool _isRunning;
     private readonly TrayIconManager _trayIconManager = new();
     private bool _forceClose;
+    private IntPtr _originalWndProc;
+    private WndProcDelegate? _subclassProc;
 
     public MainWindow()
     {
@@ -36,8 +56,12 @@ public sealed partial class MainWindow : Window
 
         // Intercept the close button to minimize to tray instead of exiting
         this.AppWindow.Closing += AppWindow_Closing;
-        // Intercept minimize event to hide to tray
-        this.AppWindow.Changed += AppWindow_Changed;
+
+        // Subclass the native window to intercept minimize (WM_SIZE)
+        var hwnd = WindowNative.GetWindowHandle(this);
+        _subclassProc = SubclassWndProc;
+        _originalWndProc = SetWindowLongPtr(hwnd, GWL_WNDPROC,
+            Marshal.GetFunctionPointerForDelegate(_subclassProc));
     }
 
     private void LoadSettings()
@@ -354,6 +378,25 @@ public sealed partial class MainWindow : Window
         }
     }
 
+    private IntPtr SubclassWndProc(IntPtr hWnd, uint msg, IntPtr wParam, IntPtr lParam)
+    {
+        if (msg == WM_SIZE && (int)wParam == SIZE_MINIMIZED)
+        {
+            if (MinimizeToTrayCheckBox.IsChecked == true)
+            {
+                // Restore from minimized state first, then hide to tray
+                ShowWindow(hWnd, SW_RESTORE);
+                this.AppWindow.Hide();
+                _trayIconManager.UpdateTooltip(_isRunning
+                    ? "Fire TV Enforcer - Running"
+                    : "Fire TV Enforcer - Idle");
+                return IntPtr.Zero;
+            }
+        }
+
+        return CallWindowProc(_originalWndProc, hWnd, msg, wParam, lParam);
+    }
+
     private void OnTrayRestoreRequested()
     {
         DispatcherQueue.TryEnqueue(() =>
@@ -373,4 +416,6 @@ public sealed partial class MainWindow : Window
         });
     }
 }
+
+
 

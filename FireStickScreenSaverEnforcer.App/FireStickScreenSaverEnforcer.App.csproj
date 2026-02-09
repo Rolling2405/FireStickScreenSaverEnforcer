@@ -20,7 +20,7 @@
     
     <!-- Application info -->
     <AssemblyName>FireStickScreenSaverEnforcer</AssemblyName>
-    <Version>1.2.0</Version>
+    <Version>1.2.1</Version>
     <Authors>Your Name</Authors>
     <Description>Enforces 1-minute screensaver timeout on Fire TV Stick via ADB</Description>
   </PropertyGroup>
@@ -68,5 +68,6 @@
   <PropertyGroup>
     <PublishReadyToRun Condition="'$(Configuration)' == 'Debug'">False</PublishReadyToRun>
     <PublishReadyToRun Condition="'$(Configuration)' != 'Debug'">True</PublishReadyToRun>
+    <PlatformTarget Condition="'$(Configuration)' == 'Release'">x64</PlatformTarget>
   </PropertyGroup>
 </Project>
