@@ -14,6 +14,19 @@ public sealed class AdbResult
 }
 
 /// <summary>
+/// Result of reading Dream/screensaver secure settings from the device.
+/// </summary>
+public sealed class DreamSettingsResult
+{
+    public bool Success { get; init; }
+    public string Error { get; init; } = string.Empty;
+    public string ScreensaverEnabled { get; init; } = string.Empty;
+    public string ActivateOnSleep { get; init; } = string.Empty;
+    public string ActivateOnDock { get; init; } = string.Empty;
+    public string ScreensaverComponents { get; init; } = string.Empty;
+}
+
+/// <summary>
 /// Service for executing ADB commands using the local platform-tools folder.
 /// </summary>
 public static class AdbRunner
@@ -141,5 +154,56 @@ public static class AdbRunner
     public static async Task<AdbResult> SetScreenOffTimeoutAsync(int milliseconds)
     {
         return await RunCommandAsync($"shell settings put system screen_off_timeout {milliseconds}");
+    }
+
+    /// <summary>
+    /// Reads the Dream/screensaver secure settings in a single ADB shell invocation.
+    /// </summary>
+    public static async Task<DreamSettingsResult> GetDreamSettingsAsync()
+    {
+        var result = await RunCommandAsync(
+            "shell \"settings get secure screensaver_enabled; " +
+            "settings get secure screensaver_activate_on_sleep; " +
+            "settings get secure screensaver_activate_on_dock; " +
+            "settings get secure screensaver_components\"");
+
+        if (!result.Success)
+        {
+            return new DreamSettingsResult
+            {
+                Success = false,
+                Error = !string.IsNullOrEmpty(result.Error) ? result.Error : "Failed to read Dream settings"
+            };
+        }
+
+        var lines = result.Output.Split('\n', StringSplitOptions.None);
+        return new DreamSettingsResult
+        {
+            Success = true,
+            ScreensaverEnabled = lines.Length > 0 ? lines[0].Trim() : string.Empty,
+            ActivateOnSleep = lines.Length > 1 ? lines[1].Trim() : string.Empty,
+            ActivateOnDock = lines.Length > 2 ? lines[2].Trim() : string.Empty,
+            ScreensaverComponents = lines.Length > 3 ? lines[3].Trim() : string.Empty
+        };
+    }
+
+    /// <summary>
+    /// Enables the Dream/screensaver system by setting all required secure flags in one call.
+    /// </summary>
+    public static async Task<AdbResult> EnableDreamSettingsAsync()
+    {
+        return await RunCommandAsync(
+            "shell \"settings put secure screensaver_enabled 1; " +
+            "settings put secure screensaver_activate_on_sleep 1; " +
+            "settings put secure screensaver_activate_on_dock 1\"");
+    }
+
+    /// <summary>
+    /// Sets the screensaver component to Amazon Photos (only if it was missing).
+    /// </summary>
+    public static async Task<AdbResult> SetScreensaverComponentAsync()
+    {
+        return await RunCommandAsync(
+            "shell settings put secure screensaver_components com.amazon.bueller.photos/.daydream.ScreenSaverService");
     }
 }

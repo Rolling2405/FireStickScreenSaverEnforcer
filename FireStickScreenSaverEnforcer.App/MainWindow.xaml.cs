@@ -296,7 +296,12 @@ public sealed partial class MainWindow : Window
 
         if (cancellationToken.IsCancellationRequested) return;
 
-        // Step 2: Get current timeout value
+        // Step 2: Ensure Dream/screensaver system is enabled
+        await EnsureDreamScreensaverEnabledAsync(cancellationToken);
+
+        if (cancellationToken.IsCancellationRequested) return;
+
+        // Step 3: Get current timeout value
         var getResult = await AdbRunner.GetScreenOffTimeoutAsync();
         
         if (!getResult.Success)
@@ -320,7 +325,7 @@ public sealed partial class MainWindow : Window
 
         Log($"Current timeout: {currentValue}ms ({currentValue / 1000}s)");
 
-        // Step 3: Set timeout if needed
+        // Step 4: Set timeout if needed
         if (currentValue != _settings.TimeoutMs)
         {
             if (cancellationToken.IsCancellationRequested) return;
@@ -347,6 +352,65 @@ public sealed partial class MainWindow : Window
         {
             Log($"Timeout already at {_settings.TimeoutMs}ms - no change needed");
             SetStatus($"Timeout correct as of {DateTime.Now:HH:mm:ss}");
+        }
+    }
+
+    private async Task EnsureDreamScreensaverEnabledAsync(CancellationToken cancellationToken)
+    {
+        if (cancellationToken.IsCancellationRequested) return;
+
+        var dreamSettings = await AdbRunner.GetDreamSettingsAsync();
+
+        if (!dreamSettings.Success)
+        {
+            Log($"Dream settings read failed: {dreamSettings.Error}");
+            return;
+        }
+
+        var enabled = dreamSettings.ScreensaverEnabled;
+        var onSleep = dreamSettings.ActivateOnSleep;
+        var onDock = dreamSettings.ActivateOnDock;
+        var components = dreamSettings.ScreensaverComponents;
+
+        bool needsEnable = enabled != "1";
+        bool needsActivate = onSleep != "1" || onDock != "1";
+
+        if (needsEnable || needsActivate)
+        {
+            Log($"Dream/screensaver system not fully enabled (enabled={enabled}, onSleep={onSleep}, onDock={onDock}). Re-enabling...");
+
+            if (cancellationToken.IsCancellationRequested) return;
+
+            var setResult = await AdbRunner.EnableDreamSettingsAsync();
+            if (setResult.Success)
+            {
+                Log("Dream/screensaver system re-enabled successfully.");
+            }
+            else
+            {
+                var errorMsg = !string.IsNullOrEmpty(setResult.Error) ? setResult.Error : "Failed to enable Dream settings";
+                Log($"Failed to re-enable Dream settings: {errorMsg}");
+            }
+        }
+
+        // Optional: set screensaver component to Amazon Photos if missing/null
+        bool needsComponent = string.IsNullOrEmpty(components) || components == "null";
+        if (needsComponent)
+        {
+            Log("Screensaver component is not set. Setting to Amazon Photos...");
+
+            if (cancellationToken.IsCancellationRequested) return;
+
+            var compResult = await AdbRunner.SetScreensaverComponentAsync();
+            if (compResult.Success)
+            {
+                Log("Screensaver component set to Amazon Photos.");
+            }
+            else
+            {
+                var errorMsg = !string.IsNullOrEmpty(compResult.Error) ? compResult.Error : "Failed to set screensaver component";
+                Log($"Failed to set screensaver component: {errorMsg}");
+            }
         }
     }
 
