@@ -121,11 +121,15 @@ Settings are automatically saved to `settings.json` next to the executable.
 
 ## Troubleshooting
 
+### App won't launch after downloading (nothing happens)
+
+If the app does not launch after downloading, first ensure the ZIP was fully extracted and that you are running the executable from the extracted folder. If the problem persists, see the general troubleshooting steps below.
+
 ### App won't launch (no window appears)
 
 - Make sure you extracted the ZIP completely (don't run from inside the ZIP)
 - Ensure all `.pri` files are present in the folder (should be automatic)
-- If you see a Windows SmartScreen warning, click **More info** ? **Run anyway**
+- If you see a Windows SmartScreen warning, click **More info** → **Run anyway**
 - If you get a missing DLL error, re-extract the ZIP and try again
 - If you see a "Missing ADB files" error, ensure the `platform-tools` folder is present with all required files
 
