@@ -46,7 +46,7 @@ public sealed partial class MainWindow : Window
         var version = typeof(MainWindow).Assembly
             .GetCustomAttributes(typeof(System.Reflection.AssemblyInformationalVersionAttribute), false)
             .OfType<System.Reflection.AssemblyInformationalVersionAttribute>()
-            .FirstOrDefault()?.InformationalVersion ?? "?";
+            .FirstOrDefault()?.InformationalVersion?.Split('+')[0] ?? "?";
         this.Title = $"Fire TV Screensaver Timeout Enforcer v{version}";
 
         // Set window size
