@@ -46,11 +46,22 @@ public sealed class HdmiCecPrimer
 
     /// <summary>
     /// Loads a previously discovered CEC key from app settings cache.
+    /// Validates the cached values before using them.
     /// </summary>
     public void LoadCachedKey(string cachedNamespace, string cachedKeyName)
     {
-        _cachedNamespace = cachedNamespace;
-        _cachedKeyName = cachedKeyName;
+        // Validate namespace and key name before caching
+        if (SecurityHelper.ValidateNamespace(cachedNamespace) && 
+            SecurityHelper.ValidateSettingsKeyName(cachedKeyName))
+        {
+            _cachedNamespace = cachedNamespace;
+            _cachedKeyName = cachedKeyName;
+        }
+        else
+        {
+            _cachedNamespace = string.Empty;
+            _cachedKeyName = string.Empty;
+        }
     }
 
     /// <summary>
@@ -81,7 +92,8 @@ public sealed class HdmiCecPrimer
 
         // Step 2: Read current value
         var currentValue = await ReadSettingAsync(ns, key);
-        _log($"CEC current value: '{currentValue}'");
+        var sanitizedCurrentValue = SecurityHelper.SanitizeForLog(currentValue);
+        _log($"CEC current value: '{sanitizedCurrentValue}'");
 
         if (ct.IsCancellationRequested) return Cancelled();
 
@@ -90,15 +102,17 @@ public sealed class HdmiCecPrimer
         var setOnResult = await WriteSettingAsync(ns, key, "1");
         if (!setOnResult.Success)
         {
-            _log($"CEC pulse: failed to set ON: {setOnResult.Error}");
+            var sanitizedError = SecurityHelper.SanitizeForLog(setOnResult.Error);
+            _log($"CEC pulse: failed to set ON: {sanitizedError}");
             // Ensure OFF before returning
             await WriteSettingAsync(ns, key, "0");
-            return new PrimeResult { Success = false, KeyUsed = key, NamespaceUsed = ns, Error = $"Failed to set ON: {setOnResult.Error}" };
+            return new PrimeResult { Success = false, KeyUsed = key, NamespaceUsed = ns, Error = $"Failed to set ON: {sanitizedError}" };
         }
 
         // Verify ON
         var verifyOn = await ReadSettingAsync(ns, key);
-        _log($"CEC pulse: verify ON = '{verifyOn}'");
+        var sanitizedVerifyOn = SecurityHelper.SanitizeForLog(verifyOn);
+        _log($"CEC pulse: verify ON = '{sanitizedVerifyOn}'");
 
         if (ct.IsCancellationRequested)
         {
@@ -123,13 +137,15 @@ public sealed class HdmiCecPrimer
         var setOffResult = await WriteSettingAsync(ns, key, "0");
         if (!setOffResult.Success)
         {
-            _log($"CEC pulse: failed to set OFF: {setOffResult.Error}");
-            return new PrimeResult { Success = false, KeyUsed = key, NamespaceUsed = ns, Error = $"Failed to set OFF: {setOffResult.Error}" };
+            var sanitizedError = SecurityHelper.SanitizeForLog(setOffResult.Error);
+            _log($"CEC pulse: failed to set OFF: {sanitizedError}");
+            return new PrimeResult { Success = false, KeyUsed = key, NamespaceUsed = ns, Error = $"Failed to set OFF: {sanitizedError}" };
         }
 
         // Verify OFF
         var verifyOff = await ReadSettingAsync(ns, key);
-        _log($"CEC pulse: verify OFF = '{verifyOff}'");
+        var sanitizedVerifyOff = SecurityHelper.SanitizeForLog(verifyOff);
+        _log($"CEC pulse: verify OFF = '{sanitizedVerifyOff}'");
 
         bool wasAlreadyOff = currentValue == "0";
         _log(wasAlreadyOff
@@ -290,20 +306,57 @@ public sealed class HdmiCecPrimer
 
     private void CacheKey(string ns, string key)
     {
-        _cachedNamespace = ns;
-        _cachedKeyName = key;
-        _log($"Cached CEC key: {ns}/{key}");
+        // Validate before caching
+        if (SecurityHelper.ValidateNamespace(ns) && SecurityHelper.ValidateSettingsKeyName(key))
+        {
+            _cachedNamespace = ns;
+            _cachedKeyName = key;
+            _log($"Cached CEC key: {ns}/{key}");
+        }
+        else
+        {
+            _log($"Invalid CEC key format, not cached: {ns}/{key}");
+        }
     }
 
     private static async Task<string> ReadSettingAsync(string ns, string key)
     {
+        // Validate namespace and key before building command
+        if (!SecurityHelper.ValidateNamespace(ns) || !SecurityHelper.ValidateSettingsKeyName(key))
+        {
+            return "null";
+        }
+
         var result = await AdbRunner.RunCommandAsync($"shell settings get {ns} {key}");
         return result.Success ? result.Output.Trim() : string.Empty;
     }
 
     private static async Task<AdbResult> WriteSettingAsync(string ns, string key, string value)
     {
-        return await AdbRunner.RunCommandAsync($"shell settings put {ns} {key} {value}");
+        // Validate namespace and key before building command
+        if (!SecurityHelper.ValidateNamespace(ns) || !SecurityHelper.ValidateSettingsKeyName(key))
+        {
+            return new AdbResult
+            {
+                Success = false,
+                Error = "Invalid namespace or key name",
+                ExitCode = -1
+            };
+        }
+
+        // Validate value (should be 0 or 1 for CEC settings)
+        var sanitizedValue = SecurityHelper.SanitizeForCommand(value);
+        if (sanitizedValue != "0" && sanitizedValue != "1")
+        {
+            return new AdbResult
+            {
+                Success = false,
+                Error = "Invalid setting value (must be 0 or 1)",
+                ExitCode = -1
+            };
+        }
+
+        return await AdbRunner.RunCommandAsync($"shell settings put {ns} {key} {sanitizedValue}");
     }
 
     private static PrimeResult Cancelled() => new()

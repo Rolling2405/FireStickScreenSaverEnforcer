@@ -74,9 +74,33 @@ public static class AdbRunner
 
     /// <summary>
     /// Executes an ADB command and returns the result.
+    /// Input is sanitized to prevent command injection.
+    /// Output is sanitized for safe logging.
     /// </summary>
     public static async Task<AdbResult> RunCommandAsync(string arguments, int timeoutMs = 30000)
     {
+        // Validate timeout
+        if (!SecurityHelper.ValidateTimeoutMs(timeoutMs))
+        {
+            return new AdbResult
+            {
+                Success = false,
+                Error = "Invalid timeout value",
+                ExitCode = -1
+            };
+        }
+
+        // Basic validation: arguments should not be null or contain only whitespace
+        if (string.IsNullOrWhiteSpace(arguments))
+        {
+            return new AdbResult
+            {
+                Success = false,
+                Error = "ADB command arguments cannot be empty",
+                ExitCode = -1
+            };
+        }
+
         try
         {
             using var process = new Process();
@@ -110,8 +134,11 @@ public static class AdbRunner
                 };
             }
 
-            var output = (await outputTask).Trim();
-            var error = (await errorTask).Trim();
+            // Sanitize output for safe logging and display
+            var rawOutput = await outputTask;
+            var rawError = await errorTask;
+            var output = SecurityHelper.SanitizeForLog(rawOutput);
+            var error = SecurityHelper.SanitizeForLog(rawError);
 
             return new AdbResult
             {
@@ -126,7 +153,7 @@ public static class AdbRunner
             return new AdbResult
             {
                 Success = false,
-                Error = $"Failed to execute ADB: {ex.Message}",
+                Error = SecurityHelper.SanitizeForLog($"Failed to execute ADB: {ex.Message}"),
                 ExitCode = -1
             };
         }
@@ -150,9 +177,21 @@ public static class AdbRunner
 
     /// <summary>
     /// Sets the screen_off_timeout value on the device.
+    /// Validates timeout value before sending command.
     /// </summary>
     public static async Task<AdbResult> SetScreenOffTimeoutAsync(int milliseconds)
     {
+        // Validate timeout value
+        if (!SecurityHelper.ValidateTimeoutMs(milliseconds))
+        {
+            return new AdbResult
+            {
+                Success = false,
+                Error = "Invalid timeout value",
+                ExitCode = -1
+            };
+        }
+
         return await RunCommandAsync($"shell settings put system screen_off_timeout {milliseconds}");
     }
 

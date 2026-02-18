@@ -7,6 +7,60 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 ## [Unreleased]
 
+
+## [1.4.0] - 2026-02-17
+
+### ✨ New Features
+- **HDMI-CEC Prime Pulse (ON→OFF):**  
+  The app now automatically performs a “prime pulse” (toggles HDMI-CEC Device Control ON, waits, then OFF) via ADB settings on every enforcement tick. This fixes the issue where the Fire TV Stick home screen appears instead of the screensaver after setting the timeout to “Never.” The app robustly discovers the correct settings key and always leaves HDMI-CEC OFF.
+
+### 🛠 Improvements
+- The discovered HDMI-CEC key is cached in settings for faster future runs.
+- All CEC and ADB actions are logged in the activity log for transparency and troubleshooting.
+- **Maximum enforcement interval reduced to 30 seconds** (previously 600 seconds) for more responsive monitoring while keeping the minimum at 10 seconds.
+
+### 🔒 Security Enhancements
+- **Comprehensive Input Validation:**  
+  - All user inputs (IP address, port, interval, timeout) are now strictly validated before use
+  - IP addresses validated using regex patterns and .NET IPAddress parsing
+  - Port numbers validated to be in valid range (1-65535)
+  - Interval constrained to 10-30 seconds with validation
+  - Settings key names and namespaces validated against safe character sets
+
+- **Output Sanitization:**  
+  - All ADB command output sanitized before logging or display
+  - Dangerous control characters removed from logs (prevents log injection)
+  - Exception messages sanitized for safe display
+  - Log output length-limited to prevent flooding
+
+- **Command Injection Prevention:**  
+  - Dangerous shell characters (`&`, `|`, `;`, `$`, etc.) removed from all command arguments
+  - IP:Port combinations validated before ADB connect
+  - Settings values restricted to safe ranges (0/1 for CEC toggles)
+
+- **Enhanced Data Integrity:**  
+  - AppSettings model validates all properties on set
+  - Invalid settings automatically fall back to safe defaults
+  - Cached CEC keys validated on load and save
+
+### 🛠 Security Improvements
+- Added centralized `SecurityHelper` class with reusable validation and sanitization methods
+- Enhanced error messages with specific validation failure details
+- Improved defense-in-depth with multiple validation layers
+- All validation uses compiled regex patterns for performance
+
+### 📚 Documentation
+- Added comprehensive `SECURITY_ENHANCEMENTS.md` documenting all security features
+
+### 🔧 Technical
+- Follows Microsoft Security Development Lifecycle (SDL) best practices
+- Aligns with OWASP Top 10 input validation guidelines
+- Zero impact on existing functionality - fully backwards compatible
+- Uses .NET 10 modern features (partial methods for generated regex)
+
+### 🐞 Bug Fixes
+- None specific to this release.
+
 ## [1.3.0] - 2026-02-11
 
 ### Added

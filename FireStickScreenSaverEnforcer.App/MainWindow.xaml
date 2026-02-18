@@ -67,7 +67,7 @@
                 <TextBlock Text="Check Interval (seconds)"/>
                 <NumberBox x:Name="IntervalNumberBox"
                            Minimum="10"
-                           Maximum="600"
+                           Maximum="30"
                            Value="30"
                            SpinButtonPlacementMode="Compact"
                            Width="180"

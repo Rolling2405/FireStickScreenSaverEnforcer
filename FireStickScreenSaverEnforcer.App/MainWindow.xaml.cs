@@ -170,33 +170,38 @@ public sealed partial class MainWindow : Window
 
     private async void StartButton_Click(object sender, RoutedEventArgs e)
     {
-        // Validate IP address
+        // Validate and sanitize IP address
         var ipAddress = IpAddressTextBox.Text?.Trim();
-        if (string.IsNullOrEmpty(ipAddress))
+        if (!SecurityHelper.ValidateIpAddress(ipAddress, out var validIp))
         {
-            SetStatus("Error: Please enter a Fire TV IP address.");
-            Log("Error: IP address is empty.");
+            SetStatus("Error: Invalid IP address format.");
+            Log("Error: IP address validation failed. Expected format: xxx.xxx.xxx.xxx");
             return;
         }
 
-        // Validate port
+        // Validate and sanitize port
         var port = PortTextBox.Text?.Trim();
-        if (string.IsNullOrEmpty(port) || !int.TryParse(port, out var portNumber) || portNumber < 1 || portNumber > 65535)
+        if (!SecurityHelper.ValidatePort(port, out var validPort))
         {
-            SetStatus("Error: Please enter a valid port (1-65535).");
-            Log("Error: Invalid port number.");
+            SetStatus("Error: Invalid port number.");
+            Log("Error: Port must be a number between 1 and 65535.");
             return;
         }
 
-        // Combine IP and port for ADB
-        var fullAddress = $"{ipAddress}:{port}";
+        // Create sanitized full address
+        if (!SecurityHelper.SanitizeIpPort(validIp, validPort.ToString(), out var fullAddress))
+        {
+            SetStatus("Error: Failed to validate IP:Port combination.");
+            Log("Error: IP:Port validation failed.");
+            return;
+        }
 
         // Validate interval
         var interval = (int)IntervalNumberBox.Value;
-        if (interval < 10 || interval > 600)
+        if (!SecurityHelper.ValidateIntervalSeconds(interval))
         {
-            SetStatus("Error: Interval must be between 10 and 600 seconds.");
-            Log("Error: Invalid interval value.");
+            SetStatus("Error: Interval must be between 10 and 30 seconds.");
+            Log("Error: Invalid interval value. Must be 10-30 seconds.");
             return;
         }
 
@@ -209,7 +214,7 @@ public sealed partial class MainWindow : Window
             return;
         }
 
-        // Save settings
+        // Save settings (validation happens in AppSettings setters)
         SaveSettings();
 
         // Start enforcement loop
@@ -230,8 +235,9 @@ public sealed partial class MainWindow : Window
         }
         catch (Exception ex)
         {
-            Log($"Unexpected error: {ex.Message}");
-            SetStatus($"Error: {ex.Message}");
+            var sanitizedError = SecurityHelper.SanitizeForLog(ex.Message);
+            Log($"Unexpected error: {sanitizedError}");
+            SetStatus($"Error: {sanitizedError}");
         }
         finally
         {
@@ -297,13 +303,14 @@ public sealed partial class MainWindow : Window
 
         // Check if already connected or newly connected
         var connectOutput = connectResult.Output.ToLowerInvariant();
+        var sanitizedOutput = SecurityHelper.SanitizeForLog(connectResult.Output);
         if (connectOutput.Contains("connected") || connectOutput.Contains("already"))
         {
-            Log($"Connected: {connectResult.Output}");
+            Log($"Connected: {sanitizedOutput}");
         }
         else
         {
-            Log($"Connect response: {connectResult.Output}");
+            Log($"Connect response: {sanitizedOutput}");
         }
 
         if (cancellationToken.IsCancellationRequested) return;
@@ -324,7 +331,7 @@ public sealed partial class MainWindow : Window
         if (!getResult.Success)
         {
             var errorMsg = !string.IsNullOrEmpty(getResult.Error) 
-                ? getResult.Error 
+                ? SecurityHelper.SanitizeForLog(getResult.Error)
                 : "Failed to get timeout value";
             Log($"Get timeout failed: {errorMsg}");
             SetStatus($"Could not read timeout - will retry");
@@ -333,10 +340,11 @@ public sealed partial class MainWindow : Window
 
         // Parse the current value (trim whitespace and newlines)
         var currentValueStr = getResult.Output.Trim();
-        
+
         if (!int.TryParse(currentValueStr, out var currentValue))
         {
-            Log($"Could not parse timeout value: '{currentValueStr}'");
+            var sanitizedValue = SecurityHelper.SanitizeForLog(currentValueStr);
+            Log($"Could not parse timeout value: '{sanitizedValue}'");
             return;
         }
 
@@ -391,7 +399,8 @@ public sealed partial class MainWindow : Window
         }
         else if (!string.IsNullOrEmpty(result.Error) && result.Error != "Operation cancelled.")
         {
-            Log($"CEC prime pulse failed: {result.Error}");
+            var sanitizedError = SecurityHelper.SanitizeForLog(result.Error);
+            Log($"CEC prime pulse failed: {sanitizedError}");
         }
     }
 
@@ -403,7 +412,8 @@ public sealed partial class MainWindow : Window
 
         if (!dreamSettings.Success)
         {
-            Log($"Dream settings read failed: {dreamSettings.Error}");
+            var sanitizedError = SecurityHelper.SanitizeForLog(dreamSettings.Error);
+            Log($"Dream settings read failed: {sanitizedError}");
             return;
         }
 
@@ -417,7 +427,10 @@ public sealed partial class MainWindow : Window
 
         if (needsEnable || needsActivate)
         {
-            Log($"Dream/screensaver system not fully enabled (enabled={enabled}, onSleep={onSleep}, onDock={onDock}). Re-enabling...");
+            var sanitizedEnabled = SecurityHelper.SanitizeForLog(enabled);
+            var sanitizedOnSleep = SecurityHelper.SanitizeForLog(onSleep);
+            var sanitizedOnDock = SecurityHelper.SanitizeForLog(onDock);
+            Log($"Dream/screensaver system not fully enabled (enabled={sanitizedEnabled}, onSleep={sanitizedOnSleep}, onDock={sanitizedOnDock}). Re-enabling...");
 
             if (cancellationToken.IsCancellationRequested) return;
 
@@ -428,7 +441,9 @@ public sealed partial class MainWindow : Window
             }
             else
             {
-                var errorMsg = !string.IsNullOrEmpty(setResult.Error) ? setResult.Error : "Failed to enable Dream settings";
+                var errorMsg = !string.IsNullOrEmpty(setResult.Error) 
+                    ? SecurityHelper.SanitizeForLog(setResult.Error)
+                    : "Failed to enable Dream settings";
                 Log($"Failed to re-enable Dream settings: {errorMsg}");
             }
         }
