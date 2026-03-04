@@ -5,12 +5,13 @@ namespace FireStickScreenSaverEnforcer.App.Services;
 
 /// <summary>
 /// Service for loading and saving application settings to settings.json.
-/// Settings are stored next to the executable for portability.
+/// Settings are stored in the user's local app data folder for MSIX compatibility.
 /// </summary>
 public static class SettingsService
 {
     private static readonly string SettingsFilePath = Path.Combine(
-        AppContext.BaseDirectory,
+        Environment.GetFolderPath(Environment.SpecialFolder.LocalApplicationData),
+        "FireTVScreensaverEnforcer",
         "settings.json"
     );
 
@@ -53,6 +54,7 @@ public static class SettingsService
         try
         {
             var json = JsonSerializer.Serialize(settings, JsonOptions);
+            Directory.CreateDirectory(Path.GetDirectoryName(SettingsFilePath)!);
             File.WriteAllText(SettingsFilePath, json);
         }
         catch

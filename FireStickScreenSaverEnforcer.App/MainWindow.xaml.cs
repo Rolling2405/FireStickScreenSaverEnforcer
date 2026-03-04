@@ -33,7 +33,6 @@ public sealed partial class MainWindow : Window
     private AppSettings _settings = new();
     private bool _isRunning;
     private readonly TrayIconManager _trayIconManager = new();
-    private HdmiCecPrimer? _cecPrimer;
     private bool _forceClose;
     private IntPtr _originalWndProc;
     private WndProcDelegate? _subclassProc;
@@ -54,10 +53,6 @@ public sealed partial class MainWindow : Window
         appWindow.Resize(new Windows.Graphics.SizeInt32(600, 700));
 
         LoadSettings();
-
-        // Initialize the HDMI-CEC primer with cached key from settings
-        _cecPrimer = new HdmiCecPrimer(Log);
-        _cecPrimer.LoadCachedKey(_settings.CecKeyNamespace, _settings.CecKeyName);
 
         TimeoutComboBox.SelectionChanged += TimeoutComboBox_SelectionChanged;
 
@@ -320,12 +315,7 @@ public sealed partial class MainWindow : Window
 
         if (cancellationToken.IsCancellationRequested) return;
 
-        // Step 3: HDMI-CEC prime pulse (ON→OFF) to fix screensaver-not-showing after "Never" workaround
-        await RunCecPrimePulseAsync(cancellationToken);
-
-        if (cancellationToken.IsCancellationRequested) return;
-
-        // Step 4: Get current timeout value
+        // Step 3: Get current timeout value
         var getResult = await AdbRunner.GetScreenOffTimeoutAsync();
         
         if (!getResult.Success)
@@ -350,7 +340,7 @@ public sealed partial class MainWindow : Window
 
         Log($"Current timeout: {currentValue}ms ({currentValue / 1000}s)");
 
-        // Step 5: Set timeout if needed
+        // Step 4: Set timeout if needed
         if (currentValue != _settings.TimeoutMs)
         {
             if (cancellationToken.IsCancellationRequested) return;
@@ -377,30 +367,6 @@ public sealed partial class MainWindow : Window
         {
             Log($"Timeout already at {_settings.TimeoutMs}ms - no change needed");
             SetStatus($"Timeout correct as of {DateTime.Now:HH:mm:ss}");
-        }
-    }
-
-    private async Task RunCecPrimePulseAsync(CancellationToken cancellationToken)
-    {
-        if (cancellationToken.IsCancellationRequested || _cecPrimer is null) return;
-
-        var result = await _cecPrimer.PrimeAsync(cancellationToken);
-
-        if (result.Success)
-        {
-            // Persist the discovered key so future runs skip probing
-            var (ns, key) = _cecPrimer.GetCachedKey();
-            if (_settings.CecKeyNamespace != ns || _settings.CecKeyName != key)
-            {
-                _settings.CecKeyNamespace = ns;
-                _settings.CecKeyName = key;
-                SettingsService.Save(_settings);
-            }
-        }
-        else if (!string.IsNullOrEmpty(result.Error) && result.Error != "Operation cancelled.")
-        {
-            var sanitizedError = SecurityHelper.SanitizeForLog(result.Error);
-            Log($"CEC prime pulse failed: {sanitizedError}");
         }
     }
 

@@ -10,8 +10,6 @@ public sealed class AppSettings
     private string _firestickIp = "192.168.1.50:5555";
     private int _intervalSeconds = 30;
     private int _timeoutMs = 60000;
-    private string _cecKeyNamespace = string.Empty;
-    private string _cecKeyName = string.Empty;
 
     /// <summary>
     /// Fire TV Stick IP address including port (e.g., "192.168.1.50:5555").
@@ -62,36 +60,4 @@ public sealed class AppSettings
     /// When true, closing the window minimizes to the system tray instead of exiting.
     /// </summary>
     public bool MinimizeToTray { get; set; } = true;
-
-    /// <summary>
-    /// Cached HDMI-CEC settings namespace discovered by key probing (e.g., "global", "secure", "system").
-    /// Empty means not yet discovered.
-    /// </summary>
-    public string CecKeyNamespace
-    {
-        get => _cecKeyNamespace;
-        set
-        {
-            if (string.IsNullOrWhiteSpace(value) || SecurityHelper.ValidateNamespace(value))
-            {
-                _cecKeyNamespace = value?.Trim() ?? string.Empty;
-            }
-        }
-    }
-
-    /// <summary>
-    /// Cached HDMI-CEC settings key name discovered by key probing (e.g., "hdmi_control_enabled").
-    /// Empty means not yet discovered.
-    /// </summary>
-    public string CecKeyName
-    {
-        get => _cecKeyName;
-        set
-        {
-            if (string.IsNullOrWhiteSpace(value) || SecurityHelper.ValidateSettingsKeyName(value))
-            {
-                _cecKeyName = value?.Trim() ?? string.Empty;
-            }
-        }
-    }
 }

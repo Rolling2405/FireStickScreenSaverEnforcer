@@ -4,29 +4,33 @@
   xmlns="http://schemas.microsoft.com/appx/manifest/foundation/windows10"
   xmlns:mp="http://schemas.microsoft.com/appx/2014/phone/manifest"
   xmlns:uap="http://schemas.microsoft.com/appx/manifest/uap/windows10"
+  xmlns:uap3="http://schemas.microsoft.com/appx/manifest/uap/windows10/3"
   xmlns:rescap="http://schemas.microsoft.com/appx/manifest/foundation/windows10/restrictedcapabilities"
-  IgnorableNamespaces="uap rescap">
+  IgnorableNamespaces="uap uap3 rescap mp">
 
+  <!--
+    Identity: Replace Name and Publisher with the values from your Microsoft Partner Center account.
+    Version must be incremented for each Store submission (format: Major.Minor.Build.Revision).
+  -->
   <Identity
-    Name="5775a503-70e9-4297-b444-79b45e0f8013"
-    Publisher="CN=User"
-    Version="1.0.0.0" />
+    Name="FireTVScreensaverEnforcer"
+    Publisher="CN=YourPublisherName"
+    Version="1.4.0.0" />
 
   <mp:PhoneIdentity PhoneProductId="5775a503-70e9-4297-b444-79b45e0f8013" PhonePublisherId="00000000-0000-0000-0000-000000000000"/>
 
   <Properties>
-    <DisplayName>FireStickScreenSaverEnforcer.App</DisplayName>
-    <PublisherDisplayName>User</PublisherDisplayName>
+    <DisplayName>Fire TV Screensaver Enforcer</DisplayName>
+    <PublisherDisplayName>YourPublisherDisplayName</PublisherDisplayName>
     <Logo>Assets\StoreLogo.png</Logo>
   </Properties>
 
   <Dependencies>
-    <TargetDeviceFamily Name="Windows.Universal" MinVersion="10.0.17763.0" MaxVersionTested="10.0.19041.0" />
-    <TargetDeviceFamily Name="Windows.Desktop" MinVersion="10.0.17763.0" MaxVersionTested="10.0.19041.0" />
+    <TargetDeviceFamily Name="Windows.Desktop" MinVersion="10.0.17763.0" MaxVersionTested="10.0.26100.0" />
   </Dependencies>
 
   <Resources>
-    <Resource Language="x-generate"/>
+    <Resource Language="en-US"/>
   </Resources>
 
   <Applications>
@@ -34,18 +38,20 @@
       Executable="$targetnametoken$.exe"
       EntryPoint="$targetentrypoint$">
       <uap:VisualElements
-        DisplayName="FireStickScreenSaverEnforcer.App"
-        Description="FireStickScreenSaverEnforcer.App"
+        DisplayName="Fire TV Screensaver Enforcer"
+        Description="Keeps your Fire TV screensaver timeout at your chosen value by periodically enforcing the setting via ADB."
         BackgroundColor="transparent"
-        Square150x150Logo="Assets\Square150x150Logo.png"
-        Square44x44Logo="Assets\Square44x44Logo.png">
-        <uap:DefaultTile Wide310x150Logo="Assets\Wide310x150Logo.png" />
-        <uap:SplashScreen Image="Assets\SplashScreen.png" />
+        Square150x150Logo="Assets\Square150x150Logo.scale-200.png"
+        Square44x44Logo="Assets\Square44x44Logo.scale-200.png">
+        <uap:DefaultTile Wide310x150Logo="Assets\Wide310x150Logo.scale-200.png"
+                         ShortName="Fire TV Enforcer"/>
+        <uap:SplashScreen Image="Assets\SplashScreen.scale-200.png" />
       </uap:VisualElements>
     </Application>
   </Applications>
 
   <Capabilities>
+    <!-- Required for spawning ADB processes and full filesystem access -->
     <rescap:Capability Name="runFullTrust" />
   </Capabilities>
 </Package>

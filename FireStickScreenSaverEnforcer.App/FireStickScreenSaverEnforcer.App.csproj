@@ -11,25 +11,22 @@
     <Nullable>enable</Nullable>
     <ImplicitUsings>enable</ImplicitUsings>
     
-    <!-- Unpackaged deployment (no MSIX, no certificate required) -->
-    <WindowsPackageType>None</WindowsPackageType>
-    <WindowsAppSDKSelfContained>true</WindowsAppSDKSelfContained>
-    
-    <!-- Self-contained: Bundle .NET runtime (no .NET install required) -->
+    <!-- MSIX packaging for Microsoft Store submission -->
+    <!-- Publisher, Identity Name, and certificate must match Partner Center values -->
+    <AppxPackageSigningEnabled>False</AppxPackageSigningEnabled>
+
+    <!-- Self-contained: Bundle .NET runtime (no .NET install required on target machine) -->
     <SelfContained>true</SelfContained>
     
     <!-- Application info -->
     <AssemblyName>FireStickScreenSaverEnforcer</AssemblyName>
     <Version>1.4.0</Version>
     <Authors>Your Name</Authors>
-    <Description>Enforces 1-minute screensaver timeout on Fire TV Stick via ADB</Description>
+    <Description>Enforces screensaver timeout on Fire TV Stick via ADB</Description>
   </PropertyGroup>
 
   <ItemGroup>
     <Manifest Include="$(ApplicationManifest)" />
-    <!-- <None Include="app.ico">
-      <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
-    </None> -->
   </ItemGroup>
 
   <!-- NuGet packages -->
