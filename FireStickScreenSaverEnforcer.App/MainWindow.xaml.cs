@@ -37,6 +37,7 @@ public sealed partial class MainWindow : Window
     private bool _forceClose;
     private IntPtr _originalWndProc;
     private WndProcDelegate? _subclassProc;
+    private bool _cecPrimeCompleted;
 
     public MainWindow()
     {
@@ -219,6 +220,7 @@ public sealed partial class MainWindow : Window
 
         // Start enforcement loop
         _cancellationTokenSource = new CancellationTokenSource();
+        _cecPrimeCompleted = false;
         _isRunning = true;
         SetButtonStates(true);
         var timeoutText = _settings.TimeoutMs == 30000 ? "30 seconds" : "1 minute";
@@ -320,8 +322,13 @@ public sealed partial class MainWindow : Window
 
         if (cancellationToken.IsCancellationRequested) return;
 
-        // Step 3: HDMI-CEC prime pulse (ON→OFF) to fix screensaver-not-showing after "Never" workaround
-        await RunCecPrimePulseAsync(cancellationToken);
+        // Step 3: HDMI-CEC prime pulse (ON→OFF) - only on the first enforcement tick
+        if (!_cecPrimeCompleted)
+        {
+            Log("First enforcement tick - running HDMI-CEC prime pulse...");
+            await RunCecPrimePulseAsync(cancellationToken);
+            _cecPrimeCompleted = true;
+        }
 
         if (cancellationToken.IsCancellationRequested) return;
 
