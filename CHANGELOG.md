@@ -7,6 +7,13 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 ## [Unreleased]
 
+## [1.5.0] - 2026-XX-XX
+
+### Changed
+- **HDMI-CEC Prime Pulse:** Now only runs once at startup instead of on every enforcement tick, improving reliability and reducing unnecessary toggling.
+
+## [1.4.0] - 2026-02-19
+
 
 ## [1.4.0] - 2026-02-19
 

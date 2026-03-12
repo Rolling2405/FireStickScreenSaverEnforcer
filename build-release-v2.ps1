@@ -9,7 +9,7 @@ Write-Host ""
 
 # Configuration
 $projectPath = "FireStickScreenSaverEnforcer.App"
-$version = "v1.0.0"
+$version = "v1.5.0"
 $outputZip = "FireStickScreenSaverEnforcer-$version-win-x64.zip"
 $runtimeInstallerUrl = "https://aka.ms/windowsappsdk/1.8/latest/windowsappruntimeinstall-x64.exe"
 $runtimeInstaller = "$projectPath\windowsappruntimeinstall-x64.exe"
@@ -71,13 +71,20 @@ if (-not (Test-Path $publishPath)) {
 }
 
 # Check runtime installer
-if (Test-Path "$publishPath\windowsappruntimeinstall-x64.exe") {
-    $size = [Math]::Round((Get-Item "$publishPath\windowsappruntimeinstall-x64.exe").Length / 1MB, 2)
-    Write-Host "  ? Runtime installer: $size MB" -ForegroundColor Green
-} else {
-    Write-Host "  ? Runtime installer not found in publish folder!" -ForegroundColor Red
-    exit 1
+
+# Ensure runtime installer is present in publish folder
+if (-not (Test-Path "$publishPath\windowsappruntimeinstall-x64.exe")) {
+    if (Test-Path $runtimeInstaller) {
+        Copy-Item $runtimeInstaller "$publishPath\windowsappruntimeinstall-x64.exe" -Force
+        Write-Host "  ? Copied runtime installer to publish folder" -ForegroundColor Green
+    } else {
+        Write-Host "  ? Runtime installer not found in project root!" -ForegroundColor Red
+        Write-Host "  Please download manually from: $runtimeInstallerUrl" -ForegroundColor Yellow
+        exit 1
+    }
 }
+$size = [Math]::Round((Get-Item "$publishPath\windowsappruntimeinstall-x64.exe").Length / 1MB, 2)
+Write-Host "  ? Runtime installer: $size MB" -ForegroundColor Green
 
 # Check ADB tools
 if (Test-Path "$publishPath\platform-tools\adb.exe") {
