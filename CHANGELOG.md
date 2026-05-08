@@ -7,6 +7,26 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 ## [Unreleased]
 
+## [1.6.0] - 2026-XX-XX
+
+### Added
+- **AdvancedSharpAdbClient migration:** Replaced per-command `Process.Start("adb.exe", ...)` invocations with the managed AdvancedSharpAdbClient NuGet package (v3.6.16). All ADB shell commands now flow over a single persistent TCP connection to the ADB server, eliminating process spawn overhead.
+- **Real-time device monitor:** New `AdbConnectionMonitor` service wraps `DeviceMonitor` to detect device offline/online transitions between enforcement ticks instead of only when a command fails.
+- **Connection status badge (UI):** Added a status indicator next to the main status row that shows 🟢 Online / 🔴 Offline / 🟡 Reconnecting / 🔒 Unauthorized state in real time.
+- **Distinct error logging:** Failures are now classified and logged with category prefixes — `[Device Offline]`, `[Unauthorized]`, `[No Devices]`, `[ADB Server Error]`, `[Command Failed]` — for faster diagnosis.
+- **Sleep enforcement:** Every enforcement tick now also checks `secure sleep_timeout` and sets it to `0` (never sleep) if not already disabled. Without this, Fire TV deep-sleep can prevent the screensaver from ever activating. Values `0` and `-1` are both treated as "already disabled".
+- **30-second flat reconnect loop:** When the device goes offline, the app retries every 30 seconds (no exponential backoff). After 3 consecutive failures it issues an ADB server reset (`StopServerAsync` + `StartServerAsync`) and continues retrying.
+
+### Changed
+- **adb.exe updated to 37.0.0** (from 36.0.2). Includes the new `libadbmdns` default mDNS backend for more reliable wireless device discovery. Bundled `AdbWinApi.dll` and `AdbWinUsbApi.dll` updated to match.
+- ADB server start/stop now uses the library's `AdbServer.StartServerAsync` / `StopServerAsync` instead of spawning `adb.exe kill-server`. The bundled `adb.exe` is still required (and used) to start the server process itself.
+
+### Fixed
+- **Dream-screensaver false re-enable bug:** `SecurityHelper.SanitizeForLog` was being applied to ADB output before parsing, replacing internal `\r` characters (from Windows `\r\n` line endings) with `?`. This caused `GetDreamSettingsAsync` to compare values like `"1?"` against `"1"`, triggering "Dream/screensaver system not fully enabled" on every single tick even when it was correct. Parsing now uses a new unsanitized `AdbResult.RawOutput` field; sanitized `Output` is still used for log lines.
+
+### Security
+- Tailscale-friendly: ADB server reset is verified safe — `kill-server` does NOT clear authorization keys (stored in `%USERPROFILE%\.android\adbkey` and on the Fire TV).
+
 ## [1.5.0] - 2026-XX-XX
 
 ### Changed
